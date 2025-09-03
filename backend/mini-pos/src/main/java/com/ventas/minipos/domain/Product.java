@@ -34,8 +34,7 @@ public class Product {
 
 
     private Instant creadoEn;
-
-
+    
     @PrePersist
     void pre() {
         if (creadoEn == null) creadoEn = Instant.now();
