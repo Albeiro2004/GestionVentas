@@ -1,0 +1,29 @@
+package com.ventas.minipos.domain;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "access")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Access {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalDateTime fecha;
+    private String ip;
+    private String estado; // "ÉXITO" o "FALLIDO"
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+}

@@ -4,7 +4,11 @@ import com.ventas.minipos.Jwt.JwtService;
 import com.ventas.minipos.domain.Role;
 import com.ventas.minipos.domain.User;
 import com.ventas.minipos.repo.UserRepository;
+import com.ventas.minipos.service.UserService;
+import com.ventas.minipos.service.UserServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +22,10 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserServiceImpl userService;
+
+    @Autowired
+    private HttpServletRequest req;
 
     public AuthResponse login(LoginRequest request) {
         try {
@@ -29,6 +37,13 @@ public class AuthService {
         }
 
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
+
+        // Obtener la IP del cliente (si tienes HttpServletRequest disponible
+        String ip = req.getRemoteAddr();
+
+        // Registrar acceso
+        userService.registrarAcceso(user, "LOGIN", ip);
+
         String token = jwtService.getToken(user);
         return AuthResponse.builder()
                 .token(token)

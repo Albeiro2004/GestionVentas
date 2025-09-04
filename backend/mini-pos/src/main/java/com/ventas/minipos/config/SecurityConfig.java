@@ -30,6 +30,7 @@ public class SecurityConfig {
                     authRequest
                         .requestMatchers("/auth/**").permitAll()
                             .requestMatchers("/Ventas/**").hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers("/Ventas/users/**").hasAnyAuthority("ADMIN")
                             .anyRequest().authenticated()
                         )
                 .exceptionHandling(ex -> ex
