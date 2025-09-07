@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,8 +30,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authRequest ->
                     authRequest
                         .requestMatchers("/auth/**").permitAll()
-                            .requestMatchers("/Ventas/**").hasAnyAuthority("USER", "ADMIN")
-                            .requestMatchers("/Ventas/users/**").hasAnyAuthority("ADMIN")
+                            .requestMatchers("/Ventas/users/logout").permitAll()
+                            .requestMatchers("/Ventas/purchases").hasAuthority("ADMIN")
+                            .requestMatchers("/Ventas/users/**").hasAuthority("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/Ventas/**").hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers("/Ventas/**").hasAuthority("ADMIN")
                             .anyRequest().authenticated()
                         )
                 .exceptionHandling(ex -> ex
