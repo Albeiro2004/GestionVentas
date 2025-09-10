@@ -28,15 +28,34 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authRequest ->
-                    authRequest
-                        .requestMatchers("/auth/**").permitAll()
-                            .requestMatchers("/Ventas/users/logout").permitAll()
-                            .requestMatchers("/Ventas/purchases").hasAuthority("ADMIN")
-                            .requestMatchers("/Ventas/users/**").hasAuthority("ADMIN")
-                            .requestMatchers(HttpMethod.GET, "/Ventas/**").hasAnyAuthority("USER", "ADMIN")
-                            .requestMatchers("/Ventas/**").hasAuthority("ADMIN")
-                            .anyRequest().authenticated()
-                        )
+                        authRequest
+                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/Ventas/users/logout").permitAll()
+
+                                // Ventas - Facturas
+                                .requestMatchers(HttpMethod.GET, "/Ventas/sales/invoices/**").hasAnyAuthority("USER", "ADMIN")
+                                .requestMatchers("/Ventas/sales/invoices/**").hasAuthority("ADMIN")
+
+                                // Ventas generales
+                                .requestMatchers("/Ventas/sales/**").hasAnyAuthority("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/Ventas/sales").hasAnyAuthority("USER", "ADMIN")
+
+                                // Productos
+                                .requestMatchers("/Ventas/products/**").hasAnyAuthority("USER", "ADMIN")
+
+                                // Debts (usuarios solo lectura, admin full)
+                                .requestMatchers(HttpMethod.GET, "/Ventas/debts/**").hasAnyAuthority("USER", "ADMIN")
+                                .requestMatchers("/Ventas/debts/**").hasAuthority("ADMIN")
+
+                                // Solo ADMIN
+                                .requestMatchers("/Ventas/users/**").hasAuthority("ADMIN")
+                                .requestMatchers("/Ventas/purchases/**").hasAuthority("ADMIN")
+
+                                // Cualquier otra solicitud autenticada
+                                .anyRequest().authenticated()
+
+                )
+
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);

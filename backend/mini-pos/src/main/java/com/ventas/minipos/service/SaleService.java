@@ -1,0 +1,86 @@
+package com.ventas.minipos.service;
+
+import com.ventas.minipos.domain.Product;
+import com.ventas.minipos.domain.Sale;
+import com.ventas.minipos.domain.SaleItem;
+import com.ventas.minipos.dto.*;
+import com.ventas.minipos.exception.BusinessException;
+import com.ventas.minipos.exception.SaleDeletionException;
+import com.ventas.minipos.repo.ProductRepository;
+import com.ventas.minipos.repo.SaleItemRepository;
+import com.ventas.minipos.repo.SaleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class SaleService {
+
+    private final SaleRepository saleRepository;
+    private final ProductRepository productRepository;
+    private final SaleItemRepository saleItemRepository;
+
+    @Transactional(readOnly = true)
+    public List<SaleDTO> getAllSales() {
+        return saleRepository.findAllWithCustomerAndUser();
+    }
+
+    @Transactional
+    public void deleteSale(Long saleId) {
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new BusinessException("Factura no encontrada"));
+
+        // Verificar si la factura es del día actual
+        LocalDate today = LocalDate.now();
+        LocalDate saleDate = sale.getSaleDate().toLocalDate(); // convertimos a LocalDate para ignorar horas
+
+        if (!saleDate.isEqual(today)) {
+            throw new SaleDeletionException("Solo se pueden eliminar facturas del día actual \nConsulta con el Desarrollador para Proceder con esta Acción.");
+        }
+
+        // 🔄 Devolver stock de cada producto
+        sale.getItems().forEach(item -> {
+            Product product = item.getProduct();
+            product.setStock(product.getStock() + item.getCantidad());
+            productRepository.save(product);
+        });
+
+        // 🗑️ Eliminar factura y sus items (en cascada si está configurado)
+        saleRepository.delete(sale);
+    }
+
+    private SaleDTO toDTO(Sale sale) {
+        return SaleDTO.builder()
+                .id(sale.getId())
+                .saleDate(sale.getSaleDate())
+                .total(sale.getTotal())
+                .customer(CustomerDTO.builder()
+                        .documento(sale.getCustomer().getDocumento())
+                        .nombre(sale.getCustomer().getNombre())
+                        .build())
+                .name(sale.getUser().getName())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SaleItemDTO> getSaleItems(Long saleId) {
+        return saleItemRepository.findItemsBySaleId(saleId);
+    }
+
+    private SaleItemDTO itemToDTO(SaleItem it) {
+        return SaleItemDTO.builder()
+                .id(it.getId())
+                .cantidad(it.getCantidad())
+                .precioUnitario(it.getPrecioUnitario())
+                .descuento(it.getDescuento())
+                .subtotal(it.getSubtotal())
+                .productName(it.getProduct().getNombre())
+                .build();
+    }
+
+
+}
