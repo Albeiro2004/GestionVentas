@@ -1,12 +1,17 @@
 package com.ventas.minipos.repo;
 
 import com.ventas.minipos.domain.Sale;
+import com.ventas.minipos.dto.SaleByDateDTO;
 import com.ventas.minipos.dto.SaleDTO;
+import com.ventas.minipos.dto.TopProductDTO;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +29,33 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             "join s.user u")
     List<SaleDTO> findAllWithCustomerAndUser();
 
-
     @EntityGraph(attributePaths = {"items", "items.product"})
     Optional<Sale> findById(Long id);
+
+    // ✅ Total ventas en el rango
+    @Query("SELECT SUM(s.total) FROM Sale s WHERE s.saleDate BETWEEN :start AND :end")
+    Double findTotalSalesByDateRange(@Param("start") LocalDateTime start,
+                                     @Param("end") LocalDateTime end);
+
+    // ✅ Productos más vendidos en el rango
+    @Query("""
+        SELECT new com.ventas.minipos.dto.TopProductDTO(p.nombre, SUM(si.cantidad))
+        FROM SaleItem si
+        JOIN si.product p
+        JOIN si.sale s
+        WHERE s.saleDate BETWEEN :start AND :end
+        GROUP BY p.nombre
+        ORDER BY SUM(si.cantidad) DESC
+    """)
+    List<TopProductDTO> findTopSellingProducts(LocalDateTime start, LocalDateTime end);
+
+    // ✅ Historial de ventas por día en el rango
+    @Query("""
+    SELECT new com.ventas.minipos.dto.SaleByDateDTO(s.saleDate, CAST(SUM(s.total) AS double))
+    FROM Sale s
+    WHERE s.saleDate BETWEEN :start AND :end
+    GROUP BY s.saleDate
+    ORDER BY s.saleDate ASC """)
+    List<SaleByDateDTO> findSalesByDateRange(LocalDateTime start, LocalDateTime end);
 
 }

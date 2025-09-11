@@ -27,6 +27,8 @@ public class Sale {
 
     private PaymentType paymentType;
     private double total;
+
+    @Column(name = "sale_date")
     private LocalDateTime saleDate;
 
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
