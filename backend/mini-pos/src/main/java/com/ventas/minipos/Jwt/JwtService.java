@@ -2,8 +2,8 @@ package com.ventas.minipos.Jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,15 @@ import io.jsonwebtoken.Jwts;
 public class JwtService {
 
     // Al menos 32 caracteres
-    private static final String SECRET_KEY = "KFDEOIGHHTRH985U54HIG9H485HUGIU4OH984HJEHNI984UNIGJI8I5454Y4Y56J";
+    //private static final String SECRET_KEY = "KFDEOIGHHTRH985U54HIG9H485HUGIU4OH984HJEHNI984UNIGJI8I5454Y4Y56J";
+    private final String SECRET_KEY;
+
+    public JwtService(@Value("${jwt.secret}") String secretKey) {
+        this.SECRET_KEY = secretKey;
+    }
+
+    @Value("${jwt.expiration-ms}")
+    private long expirationMs;
 
     public String getToken(UserDetails user) {
         return getToken(new HashMap<>(), user);
@@ -32,7 +40,7 @@ public class JwtService {
                 .claim("role", user.getAuthorities().iterator().next().getAuthority())
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 1 día
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))// 1 día
                 .signWith(getKey(), SignatureAlgorithm.HS256) // <- Cambiado
                 .compact();
     }
