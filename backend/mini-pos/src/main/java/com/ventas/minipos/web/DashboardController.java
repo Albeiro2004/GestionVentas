@@ -7,12 +7,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
 
 @RestController
 @RequestMapping("/Ventas")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "")
 public class DashboardController {
 
     @GetMapping("/summary")
