@@ -15,4 +15,10 @@ public class FullReportDTO {
     private Double totalPurchases;
     private List<TopProductDTO> topSellingProducts;
     private List<SaleByDateDTO> salesByDateRange;
+    private List<SaleDTO> sales;
+
+    private Long totalProducts;
+    private Long lowStockProducts;
+    private Long outOfStockProducts;
+    private Double inventoryValue;
 }

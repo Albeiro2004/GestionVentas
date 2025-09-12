@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +22,7 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     List<Sale> findAll();
 
     @Query("select new com.ventas.minipos.dto.SaleDTO(" +
-            "s.id, s.saleDate, s.total, new com.ventas.minipos.dto.CustomerDTO(c.nombre, c.documento), u.name) " +
+            "s.id, s.saleDate, s.total, new com.ventas.minipos.dto.CustomerDTO(c.documento, c.nombre), u.name) " +
             "from Sale s " +
             "join s.customer c " +
             "join s.user u")
@@ -39,12 +38,12 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     // ✅ Productos más vendidos en el rango
     @Query("""
-        SELECT new com.ventas.minipos.dto.TopProductDTO(p.nombre, SUM(si.cantidad))
+        SELECT new com.ventas.minipos.dto.TopProductDTO(p.nombre, SUM(si.cantidad), p.precioCompra, p.precioVenta)
         FROM SaleItem si
         JOIN si.product p
         JOIN si.sale s
         WHERE s.saleDate BETWEEN :start AND :end
-        GROUP BY p.nombre
+        GROUP BY p.nombre, p.precioCompra, p.precioVenta
         ORDER BY SUM(si.cantidad) DESC
     """)
     List<TopProductDTO> findTopSellingProducts(LocalDateTime start, LocalDateTime end);
@@ -55,7 +54,18 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     FROM Sale s
     WHERE s.saleDate BETWEEN :start AND :end
     GROUP BY s.saleDate
-    ORDER BY s.saleDate ASC """)
+    ORDER BY s.saleDate ASC""")
     List<SaleByDateDTO> findSalesByDateRange(LocalDateTime start, LocalDateTime end);
+
+    @Query("select new com.ventas.minipos.dto.SaleDTO(" +
+            "s.id, s.saleDate, s.total, new com.ventas.minipos.dto.CustomerDTO(c.documento, c.nombre), u.name) " +
+            "from Sale s " +
+            "join s.customer c " +
+            "join s.user u " +
+            "where s.saleDate between :start and :end")
+    List<SaleDTO> findAllWithCustomerAndUserByDateRange(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end);
+
 
 }

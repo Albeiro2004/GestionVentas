@@ -15,4 +15,20 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     @Query("SELECT p FROM Product p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "OR LOWER(p.id) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<Product> searchSuggestions(@Param("query") String query);
+
+    // Total de productos
+    @Query("SELECT COUNT(p) FROM Product p")
+    Long countTotalProducts();
+
+    // Productos con stock bajo
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.stock < 5 AND p.stock > 0")
+    Long countLowStockProducts();
+
+    // Productos sin stock
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.stock = 0")
+    Long countOutOfStockProducts();
+
+    // Valor total del inventario (stock * precioCompra)
+    @Query("SELECT SUM(p.stock * p.precioCompra) FROM Product p")
+    Double calculateInventoryValue();
 }
