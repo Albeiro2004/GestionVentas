@@ -8,7 +8,7 @@ WORKDIR /app
 COPY backend/mini-pos/ .
 
 # Construir el proyecto con Maven
-RUN mvn -B -DskipTests package
+RUN mvn -B -DskipTests -Dproject.build.sourceEncoding=UTF-8 package
 
 # ====== Imagen final con JRE para ejecutar la app ======
 FROM eclipse-temurin:17-jdk-jammy
