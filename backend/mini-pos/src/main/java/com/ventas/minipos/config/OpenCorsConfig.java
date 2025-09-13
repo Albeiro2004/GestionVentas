@@ -21,7 +21,7 @@ public class OpenCorsConfig {
 
         // Especifica el origen exacto de tu frontend.
         // **IMPORTANTE**: Cambia http://localhost:8081 a la URL real de tu aplicación Vue.js en producción.
-        config.setAllowedOriginPatterns(List.of("https://merry-sfogliatella-cc2627.netlify.app"));
+        config.setAllowedOriginPatterns(List.of("https://merry-sfogliatella-cc2627.netlify.app", "http://localhost:8081"));
 
         // Estos métodos y cabeceras son seguros con un origen específico.
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
