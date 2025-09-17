@@ -67,5 +67,19 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
 
+    @Query("SELECT COALESCE(SUM(f.total), 0) from Sale f")
+    Double sumTotalVentas();
+
+    @Query("SELECT COALESCE(SUM(f.total), 0) FROM Sale f " +
+            "WHERE MONTH(f.saleDate) = MONTH(CURRENT_DATE) " +
+            "AND YEAR(f.saleDate) = YEAR(CURRENT_DATE)")
+    Double ventasMesActual();
+
+    @Query("SELECT COALESCE(SUM(f.total), 0) from Sale f " +
+            "WHERE MONTH(f.saleDate) = MONTH(CURRENT_DATE)-1"+
+            "AND YEAR(f.saleDate) = YEAR(CURRENT_DATE)")
+    Double ventasMesAnterior();
+
+
 
 }

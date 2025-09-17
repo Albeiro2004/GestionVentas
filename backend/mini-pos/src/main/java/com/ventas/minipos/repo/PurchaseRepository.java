@@ -17,4 +17,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     @Query("SELECT SUM(p.total) FROM Purchase p WHERE p.fecha BETWEEN :start AND :end")
     Double findTotalPurchasesByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+    @Query("SELECT COALESCE(SUM(e.total),0) FROM Purchase e")
+    Double sumTotalEgresos();
+
 }

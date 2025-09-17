@@ -2,6 +2,10 @@
 
 package com.ventas.minipos.web;
 
+import com.ventas.minipos.repo.CustomerRepository;
+import com.ventas.minipos.repo.ProductRepository;
+import com.ventas.minipos.repo.PurchaseRepository;
+import com.ventas.minipos.repo.SaleRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,44 +17,51 @@ import java.util.Map;
 @CrossOrigin(origins = "")
 public class DashboardController {
 
-    @GetMapping("/summary")
-    public ResponseEntity<?> getSummary(@RequestParam String type) {
-        switch (type.toLowerCase()) {
-            case "products":
-                return ResponseEntity.ok(getProductSummary());
-            case "sales":
-                return ResponseEntity.ok(getSalesSummary());
-            case "purchases":
-                return ResponseEntity.ok(getPurchasesSummary());
-            default:
-                return ResponseEntity.badRequest().body("Tipo de resumen no válido: " + type);
+    private final SaleRepository saleRepository;
+    private final PurchaseRepository purchaseRepository;
+    private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
+
+    public DashboardController(SaleRepository saleRepository, PurchaseRepository purchaseRepository, CustomerRepository customerRepository, ProductRepository productRepository) {
+        this.saleRepository = saleRepository;
+        this.purchaseRepository = purchaseRepository;
+        this.customerRepository = customerRepository;
+        this.productRepository = productRepository;
+    }
+
+    // Ventas totales
+    @GetMapping("/dashboard/sales")
+    public Map<String, Object> getSalesSummary() {
+        Double total = saleRepository.sumTotalVentas();
+        Double actual = saleRepository.ventasMesActual();
+        Double anterior = saleRepository.ventasMesAnterior();
+
+        Double cambio = 0.0;
+        if (anterior != null && anterior > 0) {
+            cambio = ((actual-anterior)/anterior)*100;
         }
+        return Map.of("total_sales", total, "change", cambio);
     }
 
-    private Map<String, Object> getProductSummary() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("total_products", 345);
-        data.put("low_stock_count", 15);
-        data.put("most_popular_product", "Bicicleta de Montaña");
-        data.put("products_by_category", Map.of("Bicicletas", 150, "Accesorios", 120, "Repuestos", 75));
-        return data;
+    // Egresos
+    @GetMapping("/dashboard/expenses")
+    public Map<String, Object> getExpensesSummary() {
+        Double total = purchaseRepository.sumTotalEgresos();
+        return Map.of("total_expenses", total, "change", 0);
     }
 
-    private Map<String, Object> getSalesSummary() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("total_sales", 150000.50);
-        data.put("sales_count", 250);
-        data.put("average_sale_price", 600.00);
-        data.put("monthly_sales", Map.of("Ene", 15000.0, "Feb", 22000.0, "Mar", 25000.0, "Abr", 30000.0, "May", 28000.0, "Jun", 35000.50));
-        return data;
+    // Productos
+    @GetMapping("/dashboard/products")
+    public Map<String, Object> getProductsSummary() {
+        Long total = productRepository.count();
+        return Map.of("total_products", total, "change", 0);
     }
 
-    private Map<String, Object> getPurchasesSummary() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("total_purchases", 95000.75);
-        data.put("purchase_count", 120);
-        data.put("most_common_supplier", "Proveedor A");
-        data.put("purchase_by_category", Map.of("Bicicletas", 60000.0, "Accesorios", 20000.0, "Repuestos", 15000.75));
-        return data;
+    // Clientes
+    @GetMapping("/dashboard/customers")
+    public Map<String, Object> getCustomersSummary() {
+        Long total = customerRepository.count()-1;
+        return Map.of("total_customers", total, "change", 0);
     }
+
 }
