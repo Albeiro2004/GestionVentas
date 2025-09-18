@@ -6,6 +6,7 @@ import com.ventas.minipos.repo.CustomerRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
 import com.ventas.minipos.repo.SaleRepository;
+import com.ventas.minipos.service.SaleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,26 +22,29 @@ public class DashboardController {
     private final PurchaseRepository purchaseRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final SaleService saleService;
 
-    public DashboardController(SaleRepository saleRepository, PurchaseRepository purchaseRepository, CustomerRepository customerRepository, ProductRepository productRepository) {
+    public DashboardController(SaleRepository saleRepository, PurchaseRepository purchaseRepository, CustomerRepository customerRepository, ProductRepository productRepository, SaleService saleService) {
         this.saleRepository = saleRepository;
         this.purchaseRepository = purchaseRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.saleService = saleService;
     }
 
-    // Ventas totales
+    // Ventas por periodo
     @GetMapping("/dashboard/sales")
-    public Map<String, Object> getSalesSummary() {
-        Double total = saleRepository.sumTotalVentas();
-        Double actual = saleRepository.ventasMesActual();
-        Double anterior = saleRepository.ventasMesAnterior();
+    public Map<String, Object> getSalesSummary(@RequestParam String period) {
+        Double totalActual = saleService.sumVentasByPeriod(period);
+        Double totalAnterior = saleService.sumVentasByPreviousPeriod(period);
 
         Double cambio = 0.0;
-        if (anterior != null && anterior > 0) {
-            cambio = ((actual-anterior)/anterior)*100;
+        if (totalAnterior != null && totalAnterior > 0) {
+            cambio = ((totalActual - totalAnterior) / totalAnterior) * 100;
         }
-        return Map.of("total_sales", total, "change", cambio);
+
+        return Map.of("total_sales", totalActual, "change", cambio
+        );
     }
 
     // Egresos
