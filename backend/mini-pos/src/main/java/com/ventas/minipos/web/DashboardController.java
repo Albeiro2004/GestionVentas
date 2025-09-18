@@ -6,11 +6,10 @@ import com.ventas.minipos.repo.CustomerRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
 import com.ventas.minipos.repo.SaleRepository;
+import com.ventas.minipos.service.PurchaseService;
 import com.ventas.minipos.service.SaleService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -23,13 +22,15 @@ public class DashboardController {
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
     private final SaleService saleService;
+    private final PurchaseService purchaseService;
 
-    public DashboardController(SaleRepository saleRepository, PurchaseRepository purchaseRepository, CustomerRepository customerRepository, ProductRepository productRepository, SaleService saleService) {
+    public DashboardController(SaleRepository saleRepository, PurchaseRepository purchaseRepository, CustomerRepository customerRepository, ProductRepository productRepository, SaleService saleService, PurchaseService purchaseService) {
         this.saleRepository = saleRepository;
         this.purchaseRepository = purchaseRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.saleService = saleService;
+        this.purchaseService = purchaseService;
     }
 
     // Ventas por periodo
@@ -49,9 +50,15 @@ public class DashboardController {
 
     // Egresos
     @GetMapping("/dashboard/expenses")
-    public Map<String, Object> getExpensesSummary() {
-        Double total = purchaseRepository.sumTotalEgresos();
-        return Map.of("total_expenses", total, "change", 0);
+    public Map<String, Object> getExpensesSummary(@RequestParam String period) {
+        Double totalActual = purchaseService.sumVentasByPeriod(period);
+        Double totalAnterior = purchaseService.sumVentasByPreviousPeriod(period);
+
+        Double cambio = 0.0;
+        if (totalAnterior != null && totalAnterior > 0) {
+            cambio = ((totalActual - totalAnterior) / totalAnterior) * 100;
+        }
+        return Map.of("total_expenses", totalActual, "change", cambio);
     }
 
     // Productos
