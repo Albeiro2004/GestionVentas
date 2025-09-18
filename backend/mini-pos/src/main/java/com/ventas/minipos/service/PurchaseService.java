@@ -1,19 +1,17 @@
 package com.ventas.minipos.service;
 
 import com.ventas.minipos.repo.PurchaseRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 @Service
+@RequiredArgsConstructor
 public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
-
-    public PurchaseService(PurchaseRepository purchaseRepository) {
-        this.purchaseRepository = purchaseRepository;
-    }
 
     public Double sumVentasByPeriod(String period) {
         LocalDate now = LocalDate.now();

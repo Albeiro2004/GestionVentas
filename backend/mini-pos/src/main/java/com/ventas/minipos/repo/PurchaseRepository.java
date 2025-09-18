@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
 
     // ✅ Total compras en el rango
-    @Query("SELECT SUM(p.total) FROM Purchase p WHERE p.fecha BETWEEN :start AND :end")
+    @Query("SELECT COALESCE(SUM(p.total),0) FROM Purchase p WHERE p.fecha BETWEEN :start AND :end")
     Double findTotalPurchasesByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("SELECT COALESCE(SUM(e.total),0) FROM Purchase e")
