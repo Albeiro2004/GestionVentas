@@ -11,6 +11,7 @@ import com.ventas.minipos.repo.SaleItemRepository;
 import com.ventas.minipos.repo.SaleRepository;
 import com.ventas.minipos.repo.TopProductResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -229,18 +230,18 @@ public class SaleService {
     }
 
     public List<TopProductResponse> getTopProducts() {
-        List<Object[]> results = saleRepository.findTopProducts();
+        List<Object[]> rows = saleRepository.findTopProducts();
 
-        return results.stream()
+        return rows.stream()
                 .map(r -> new TopProductResponse(
-                        ((String) r[0]),   // id
-                        (String) r[1],                // nombre
-                        (String) r[2],                // categoría
-                        ((Number) r[3]).intValue(),   // ventas
-                        ((Number) r[4]).doubleValue() // revenue
+                        (String) r[0],
+                        (String) r[1],
+                        ((Number) r[2]).intValue(),
+                        ((Number) r[3]).doubleValue()
                 ))
                 .toList();
     }
+
 
 
 }

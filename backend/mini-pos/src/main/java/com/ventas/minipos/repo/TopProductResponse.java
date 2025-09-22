@@ -8,7 +8,6 @@ import lombok.Data;
 public class TopProductResponse {
     private String id;
     private String name;
-    private String category;
     private int sales;
     private Double revenue;
 }

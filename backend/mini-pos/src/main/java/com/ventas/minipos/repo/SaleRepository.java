@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,16 +37,16 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     Double findTotalSalesByDateRange(@Param("start") LocalDateTime start,
                                      @Param("end") LocalDateTime end);
 
-    @Query(value = "SELECT p.id_producto, p.nombre, p.categoria, " +
-            "COUNT(df.id_detalle) AS ventas, SUM(df.subtotal) AS revenue " +
-            "FROM detalle_factura df " +
-            "JOIN producto p ON p.id_producto = df.id_producto " +
-            "JOIN factura f ON f.id_factura = df.id_factura " +
-            "GROUP BY p.id_producto, p.nombre, p.categoria " +
-            "ORDER BY revenue DESC " +
+    @Query(value = "SELECT p.id, p.nombre, COUNT(df.id), SUM(df.subtotal) " +
+            "FROM sale_item df " +
+            "JOIN product p ON p.id = df.product_id " +
+            "JOIN sale f ON f.id = df.sale_id " +
+            "GROUP BY p.id, p.nombre " +
+            "ORDER BY SUM(df.subtotal) DESC " +
             "LIMIT 5",
             nativeQuery = true)
     List<Object[]> findTopProducts();
+
 
     // ✅ Productos más vendidos en el rango
     @Query("""
