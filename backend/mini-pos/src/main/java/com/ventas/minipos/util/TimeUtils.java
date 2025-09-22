@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 public class TimeUtils {
 
     public static String humanReadableTime(Instant instant) {
+        if (instant == null) return "Sin fecha";
         LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
         Duration diff = Duration.between(dateTime, LocalDateTime.now());
 
