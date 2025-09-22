@@ -9,9 +9,8 @@ import com.ventas.minipos.exception.SaleDeletionException;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.SaleItemRepository;
 import com.ventas.minipos.repo.SaleRepository;
-import com.ventas.minipos.repo.TopProductResponse;
+import com.ventas.minipos.dto.TopProductResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

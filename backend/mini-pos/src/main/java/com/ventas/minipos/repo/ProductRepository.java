@@ -3,6 +3,7 @@ package com.ventas.minipos.repo;
 
 
 import com.ventas.minipos.domain.Product;
+import com.ventas.minipos.dto.LowStockProductDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,11 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     // Valor total del inventario (stock * precioCompra)
     @Query("SELECT SUM(p.stock * p.precioCompra) FROM Product p")
     Double calculateInventoryValue();
+
+    @Query("SELECT new com.ventas.minipos.dto.LowStockProductDTO(p.nombre, p.stock, p.actualizadoEn) " +
+            "FROM Product p " +
+            "WHERE p.stock < :minStock")
+    List<LowStockProductDTO> findLowStock(@Param("minStock") int minStock);
+
+
 }

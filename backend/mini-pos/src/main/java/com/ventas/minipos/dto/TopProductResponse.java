@@ -1,4 +1,4 @@
-package com.ventas.minipos.repo;
+package com.ventas.minipos.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
