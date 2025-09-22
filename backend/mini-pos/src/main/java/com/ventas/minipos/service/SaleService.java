@@ -218,10 +218,14 @@ public class SaleService {
                         r -> ((Number) r[1]).doubleValue()
                 ));
 
-        // 7 días (Lunes=1, Domingo=7)
+        // 7 días (Lun..Dom)
         return IntStream.rangeClosed(1, 7)
-                .mapToObj(d -> dataMap.getOrDefault(d, 0.0))
+                .mapToObj(d -> {
+                    int dow = (d == 7) ? 0 : d; // ajustar: Domingo=0, Lun=1..Sab=6
+                    return dataMap.getOrDefault(dow, 0.0);
+                })
                 .collect(Collectors.toList());
     }
+
 
 }
