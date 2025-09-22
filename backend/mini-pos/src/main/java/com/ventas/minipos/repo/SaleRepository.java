@@ -70,8 +70,22 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     @Query("SELECT COALESCE(SUM(f.total),0) FROM Sale f WHERE f.saleDate BETWEEN :start AND :end")
     Double sumByFechaBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+    //Ventas agrupadas por mes
+    @Query("SELECT MONTH(s.saleDate), COALESCE(SUM(s.total), 0) "+
+           "FROM Sale s "+
+            "WHERE s.saleDate BETWEEN :start AND :end "+
+            "GROUP BY MONTH(s.saleDate) "+
+            "ORDER BY MONTH(s.saleDate)")
+    List<Object[]> sumVentasByMonth(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-
+    // Ventas agrupadas por día (semana actual)
+    @Query("SELECT DAY(f.saleDate), COALESCE(SUM(f.total), 0) " +
+            "FROM Sale f " +
+            "WHERE f.saleDate BETWEEN :start AND :end " +
+            "GROUP BY DAY(f.saleDate) " +
+            "ORDER BY DAY(f.saleDate)")
+    List<Object[]> sumVentasByDay(@Param("start") LocalDateTime start,
+                                  @Param("end") LocalDateTime end);
 
 
 }

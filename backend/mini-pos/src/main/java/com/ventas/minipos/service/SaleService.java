@@ -15,7 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -153,6 +157,71 @@ public class SaleService {
         return saleRepository.sumByFechaBetween(start.atStartOfDay(), end.atTime(23,59,59));
     }
 
+    public SaleResponse getSalesByPeriod(String period) {
+        LocalDate now = LocalDate.now();
 
+        List<String> labels;
+        List<Double> actual;
+        List<Double> previous;
+
+        switch (period.toLowerCase()) {
+            case "week": {
+                LocalDate start = now.with(DayOfWeek.MONDAY);
+                LocalDate end = now.with(DayOfWeek.SUNDAY);
+
+                LocalDate prevStart = start.minusWeeks(1);
+                LocalDate prevEnd = end.minusWeeks(1);
+
+                labels = Arrays.asList("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom");
+
+                actual = fillWeekData(saleRepository.sumVentasByDay(start.atStartOfDay(), end.atTime(23,59,59)));
+                previous = fillWeekData(saleRepository.sumVentasByDay(prevStart.atStartOfDay(), prevEnd.atTime(23,59,59)));
+                break;
+            }
+
+            case "year":
+            default: {
+                LocalDate start = now.withDayOfYear(1);
+                LocalDate end = now.withMonth(12).withDayOfMonth(31);
+
+                LocalDate prevStart = start.minusYears(1);
+                LocalDate prevEnd = end.minusYears(1);
+
+                labels = Arrays.asList("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic");
+
+                actual = fillMonthData(saleRepository.sumVentasByMonth(start.atStartOfDay(), end.atTime(23,59,59)));
+                previous = fillMonthData(saleRepository.sumVentasByMonth(prevStart.atStartOfDay(), prevEnd.atTime(23,59,59)));
+                break;
+            }
+        }
+
+        return new SaleResponse(labels, actual, previous);
+    }
+
+    private List<Double> fillMonthData(List<Object[]> rawData) {
+        Map<Integer, Double> dataMap = rawData.stream()
+                .collect(Collectors.toMap(
+                        r -> ((Number) r[0]).intValue(),
+                        r -> ((Number) r[1]).doubleValue()
+                ));
+
+        // 12 meses siempre
+        return IntStream.rangeClosed(1, 12)
+                .mapToObj(m -> dataMap.getOrDefault(m, 0.0))
+                .collect(Collectors.toList());
+    }
+
+    private List<Double> fillWeekData(List<Object[]> rawData) {
+        Map<Integer, Double> dataMap = rawData.stream()
+                .collect(Collectors.toMap(
+                        r -> ((Number) r[0]).intValue(),
+                        r -> ((Number) r[1]).doubleValue()
+                ));
+
+        // 7 días (Lunes=1, Domingo=7)
+        return IntStream.rangeClosed(1, 7)
+                .mapToObj(d -> dataMap.getOrDefault(d, 0.0))
+                .collect(Collectors.toList());
+    }
 
 }

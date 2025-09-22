@@ -2,6 +2,7 @@
 
 package com.ventas.minipos.web;
 
+import com.ventas.minipos.dto.SaleResponse;
 import com.ventas.minipos.repo.CustomerRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
@@ -73,6 +74,11 @@ public class DashboardController {
     public Map<String, Object> getCustomersSummary() {
         Long total = customerRepository.count()-1;
         return Map.of("total_customers", total, "change", 0);
+    }
+
+    @GetMapping("/dashboard/chart")
+    public SaleResponse getSales(@RequestParam(defaultValue = "year") String period) {
+        return saleService.getSalesByPeriod(period);
     }
 
 }
