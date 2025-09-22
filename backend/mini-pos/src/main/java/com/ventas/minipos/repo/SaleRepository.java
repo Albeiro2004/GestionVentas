@@ -79,13 +79,16 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     List<Object[]> sumVentasByMonth(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     // Ventas agrupadas por día (semana actual)
-    @Query("SELECT DAY(f.saleDate), COALESCE(SUM(f.total), 0) " +
-            "FROM Sale f " +
-            "WHERE f.saleDate BETWEEN :start AND :end " +
-            "GROUP BY DAY(f.saleDate) " +
-            "ORDER BY DAY(f.saleDate)")
+    @Query(value = "SELECT EXTRACT(DAY FROM f.sale_date) AS dia, COALESCE(SUM(f.total), 0) " +
+            "FROM sale f " +
+            "WHERE f.sale_date BETWEEN :start AND :end " +
+            "GROUP BY EXTRACT(DAY FROM f.sale_date) " +
+            "ORDER BY dia",
+            nativeQuery = true)
     List<Object[]> sumVentasByDay(@Param("start") LocalDateTime start,
                                   @Param("end") LocalDateTime end);
+
+
 
 
 }
