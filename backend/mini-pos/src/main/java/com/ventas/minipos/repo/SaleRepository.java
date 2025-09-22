@@ -36,6 +36,17 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     Double findTotalSalesByDateRange(@Param("start") LocalDateTime start,
                                      @Param("end") LocalDateTime end);
 
+    @Query(value = "SELECT p.id_producto, p.nombre, p.categoria, " +
+            "COUNT(df.id_detalle) AS ventas, SUM(df.subtotal) AS revenue " +
+            "FROM detalle_factura df " +
+            "JOIN producto p ON p.id_producto = df.id_producto " +
+            "JOIN factura f ON f.id_factura = df.id_factura " +
+            "GROUP BY p.id_producto, p.nombre, p.categoria " +
+            "ORDER BY revenue DESC " +
+            "LIMIT 5",
+            nativeQuery = true)
+    List<Object[]> findTopProducts();
+
     // ✅ Productos más vendidos en el rango
     @Query("""
         SELECT new com.ventas.minipos.dto.TopProductDTO(p.nombre, SUM(si.cantidad), p.precioCompra, p.precioVenta)
@@ -87,9 +98,6 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             nativeQuery = true)
     List<Object[]> sumVentasByDay(@Param("start") LocalDateTime start,
                                   @Param("end") LocalDateTime end);
-
-
-
 
 
 }

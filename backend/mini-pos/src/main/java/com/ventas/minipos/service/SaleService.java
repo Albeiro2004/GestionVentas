@@ -9,6 +9,7 @@ import com.ventas.minipos.exception.SaleDeletionException;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.SaleItemRepository;
 import com.ventas.minipos.repo.SaleRepository;
+import com.ventas.minipos.repo.TopProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -225,6 +226,20 @@ public class SaleService {
                     return dataMap.getOrDefault(dow, 0.0);
                 })
                 .collect(Collectors.toList());
+    }
+
+    public List<TopProductResponse> getTopProducts() {
+        List<Object[]> results = saleRepository.findTopProducts();
+
+        return results.stream()
+                .map(r -> new TopProductResponse(
+                        ((String) r[0]),   // id
+                        (String) r[1],                // nombre
+                        (String) r[2],                // categoría
+                        ((Number) r[3]).intValue(),   // ventas
+                        ((Number) r[4]).doubleValue() // revenue
+                ))
+                .toList();
     }
 
 

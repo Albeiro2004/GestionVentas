@@ -3,14 +3,12 @@
 package com.ventas.minipos.web;
 
 import com.ventas.minipos.dto.SaleResponse;
-import com.ventas.minipos.repo.CustomerRepository;
-import com.ventas.minipos.repo.ProductRepository;
-import com.ventas.minipos.repo.PurchaseRepository;
-import com.ventas.minipos.repo.SaleRepository;
+import com.ventas.minipos.repo.*;
 import com.ventas.minipos.service.PurchaseService;
 import com.ventas.minipos.service.SaleService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -77,8 +75,14 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/chart")
-    public SaleResponse getSales(@RequestParam(defaultValue = "year") String period) {
+    public SaleResponse getSales(@RequestParam(defaultValue = "week") String period) {
         return saleService.getSalesByPeriod(period);
     }
+
+    @GetMapping("/dashboard/topProducts")
+    public List<TopProductResponse> getTopProducts() {
+        return saleService.getTopProducts();
+    }
+
 
 }
