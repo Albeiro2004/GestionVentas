@@ -166,7 +166,8 @@ public class SaleService {
         List<Double> previous;
 
         switch (period.toLowerCase()) {
-            case "week": {
+            case "week":
+            default: {
                 LocalDate start = now.with(DayOfWeek.MONDAY);
                 LocalDate end = now.with(DayOfWeek.SUNDAY);
 
@@ -180,8 +181,7 @@ public class SaleService {
                 break;
             }
 
-            case "year":
-            default: {
+            case "year": {
                 LocalDate start = now.withDayOfYear(1);
                 LocalDate end = now.withMonth(12).withDayOfMonth(31);
 

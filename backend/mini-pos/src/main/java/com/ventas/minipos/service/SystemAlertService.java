@@ -28,7 +28,7 @@ public class SystemAlertService {
         for (LowStockProductDTO product : lowStockProducts) {
             alerts.add(new SystemAlertResponse(
                     "Stock Bajo",
-                    product.nombre() + " tiene menos de " + product.stock() + " unidades en inventario",
+                    product.nombre() + " tiene " + product.stock() + " unidades en inventario",
                     TimeUtils.humanReadableTime(product.actualizadoEn()),
                     "fas fa-exclamation-triangle",
                     "text-warning",
