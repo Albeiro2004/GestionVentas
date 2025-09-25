@@ -20,18 +20,19 @@ public class Debt {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "sale_id", nullable = false)
+    @JoinColumn(name = "sale_id", nullable = true)
     @JsonIgnoreProperties({"debt"})
     private Sale sale;
 
+    @OneToOne
+    @JoinColumn(name = "service_order_id", nullable = true)
+    @JsonIgnoreProperties({"debt"})
+    private ServiceOrder serviceOrder;
+
     private Double totalAmount;
-
     private Double pendingAmount;
-
     private LocalDateTime createAt = LocalDateTime.now();
-
     private Boolean paid;
-
     private String description;
 
     @OneToMany(mappedBy = "debt", cascade = CascadeType.ALL, orphanRemoval = true)

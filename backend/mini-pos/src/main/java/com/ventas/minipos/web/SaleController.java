@@ -44,7 +44,6 @@ public class SaleController {
 
     @Transactional
     @PostMapping
-
     public ResponseEntity<?> registerSale(@RequestBody SaleRequest saleRequest) {
         try {
             // 🔐 Validar usuario autenticado
