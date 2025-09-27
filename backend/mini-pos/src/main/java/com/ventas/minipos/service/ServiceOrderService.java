@@ -1,16 +1,20 @@
 package com.ventas.minipos.service;
 
 import com.ventas.minipos.domain.*;
+import com.ventas.minipos.dto.ProductDTO;
 import com.ventas.minipos.dto.ServiceOrderRequest;
-import com.ventas.minipos.repo.CustomerRepository;
-import com.ventas.minipos.repo.DebtRepository;
-import com.ventas.minipos.repo.ServiceOrderRepository;
-import com.ventas.minipos.repo.WorkerRepository;
+import com.ventas.minipos.repo.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,43 +24,121 @@ public class ServiceOrderService {
     private final DebtRepository debtRepository;
     private final CustomerRepository customerRepository;
     private final WorkerRepository workerRepository;
+    private final ProductRepository productRepository;
+    private final SaleRepository saleRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public ServiceOrder registerService(ServiceOrderRequest request) {
-        // 🔍 Validar cliente
-        Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
 
-        // 🚫 Restricción: cliente genérico NO puede tener abonos ni deudas
+        if (request.getLaborCost() == null || request.getLaborCost() < 0) {
+            throw new IllegalArgumentException("La mano de obra es obligatoria y debe ser >= 0");
+        }
+        if(request.getWorkerId() == null) {
+            throw new IllegalArgumentException("El trabajador es obligatorio");
+        }
+
+        Customer customer = Optional.ofNullable(request.getCustomerId())
+                .flatMap(customerRepository::findById)
+                .orElseGet(() -> customerRepository.findByDocumento("0000000000")
+                        .orElseThrow(() -> new IllegalStateException("Cliente genérico no configurado en la BD")));
+
         if (isGenericCustomer(customer) &&
                 ("ABONO".equals(request.getPaymentType()) || "DEBT".equals(request.getPaymentType()))) {
             throw new IllegalArgumentException("El cliente genérico no puede tener abonos ni deudas. Solo pagos de contado.");
         }
 
-        // 🔍 Validar mecánico
-        Worker worker = workerRepository.findById(request.getWorkerId())
-                .orElseThrow(() -> new IllegalArgumentException("Mecánico no encontrado"));
-
-        // 📝 Crear ServiceOrder
         ServiceOrder order = new ServiceOrder();
-        order.setCustomer(customer);
-        order.setWorker(worker);
         order.setDescription(request.getDescription());
-        order.setTotalPrice(request.getTotalPrice());
-        order.setWorkerShare(request.getTotalPrice() * 0.7);
-        order.setWorkshopShare(request.getTotalPrice() * 0.3);
+        order.setLaborCost(request.getLaborCost());
         order.setServiceDate(LocalDateTime.now());
 
+        order.setCustomer(customer);
+
+        Worker worker = workerRepository.findById(request.getWorkerId())
+                .orElseThrow(() -> new RuntimeException("Trabajador no encontrado"));
+        order.setWorker(worker);
+
+        Sale sale = null;
+        if (!request.getProducts().isEmpty()) {
+            sale = new Sale();
+            sale.setCustomer(customer);
+            sale.setPaymentType(PaymentType.valueOf(request.getPaymentType()));
+            sale.setSaleDate(LocalDateTime.now());
+            sale.setItems(new ArrayList<>());
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()) {
+                Object principal = authentication.getPrincipal();
+                String username;
+                if (principal instanceof UserDetails) {
+                    username = ((UserDetails) principal).getUsername();
+                } else {
+                    username = principal.toString();
+                }
+
+                // Buscar usuario en tu repositorio
+                User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new IllegalStateException("Usuario autenticado no encontrado en la base de datos"));
+                sale.setUser(user); // 👈 ASIGNAR EL USUARIO
+            }
+        }
+
+        for (ProductDTO item : request.getProducts()) {
+            Product product = productRepository.findById(item.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+            if (item.getQuantity() <= 0) {
+                throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
+            }
+            if (item.getQuantity() > product.getStock()) {
+                throw new IllegalArgumentException("Stock insuficiente para: " + product.getNombre());
+            }
+
+            product.setStock(product.getStock() - item.getQuantity());
+
+            order.addproduct(product, item.getQuantity());
+
+            if (sale != null) {
+                BigDecimal precioUnitario = product.getPrecioVenta();
+                BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                SaleItem saleItem = new SaleItem();
+                saleItem.setSale(sale);
+                saleItem.setProduct(product);
+                saleItem.setCantidad(item.getQuantity());
+                saleItem.setPrecioUnitario(precioUnitario);
+                saleItem.setSubtotal(subtotal);
+
+                sale.getItems().add(saleItem);
+            }
+        }
+
+        if (sale != null) {
+            sale.setTotal(sale.getItems().stream()
+                    .map(SaleItem::getSubtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .doubleValue());
+            saleRepository.save(sale);
+        }
+
+        order.calculateShares();
         ServiceOrder savedOrder = orderRepo.save(order);
 
         // 📌 Manejo de deuda si es ABONO o DEBT
         if ("ABONO".equals(request.getPaymentType()) || "DEBT".equals(request.getPaymentType())) {
+
+            if (order.getTotalPrice() == null || order.getTotalPrice() <= 0) {
+                throw new IllegalStateException("El total del servicio no fue calculado correctamente");
+            }
+
             double abono = request.getAbonoAmount() != null ? request.getAbonoAmount() : 0.0;
-            double pendingAmount = request.getTotalPrice() - abono;
+            double totalPrice = order.getTotalPrice();
+            double pendingAmount = totalPrice - abono;
 
             Debt debt = Debt.builder()
                     .serviceOrder(savedOrder)
-                    .totalAmount(request.getTotalPrice())
+                    .totalAmount(totalPrice)
                     .createAt(LocalDateTime.now())
                     .pendingAmount(pendingAmount)
                     .paid(pendingAmount <= 0)

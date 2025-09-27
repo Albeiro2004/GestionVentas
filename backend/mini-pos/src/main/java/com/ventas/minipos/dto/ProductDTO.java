@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class ProductDTO {
-    private String id;
-    private String nombre;
+    private String productId;
+    private Integer quantity;
 }

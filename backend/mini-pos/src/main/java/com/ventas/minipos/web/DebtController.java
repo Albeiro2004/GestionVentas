@@ -48,8 +48,20 @@ public class DebtController {
         Map<String, List<Debt>> grouped = debts.stream()
                 .collect(Collectors.groupingBy(
                         d -> {
-                            String customerId = String.valueOf(d.getSale().getCustomer().getDocumento());
-                            String customerName = d.getSale().getCustomer().getNombre();
+                            String customerId;
+                            String customerName;
+
+                            if (d.getSale() != null && d.getSale().getCustomer() != null) {
+                                customerId = String.valueOf(d.getSale().getCustomer().getDocumento());
+                                customerName = d.getSale().getCustomer().getNombre();
+                            } else if (d.getServiceOrder() != null && d.getServiceOrder().getCustomer() != null) {
+                                customerId = String.valueOf(d.getServiceOrder().getCustomer().getDocumento());
+                                customerName = d.getServiceOrder().getCustomer().getNombre();
+                            } else {
+                                customerId = "N/A";
+                                customerName = "Cliente desconocido";
+                            }
+
                             return customerId + "|" + customerName;
                         },
                         LinkedHashMap::new,
@@ -67,12 +79,22 @@ public class DebtController {
                         .map(p -> new PaymentDTO(p.getId(), p.getAmount(), p.getPaymentDate()))
                         .collect(Collectors.toList());
 
+                // 👇 Lógica para asegurar que nunca sea null
+                String debtCustomerName;
+                if (d.getSale() != null && d.getSale().getCustomer() != null) {
+                    debtCustomerName = d.getSale().getCustomer().getNombre();
+                } else if (d.getServiceOrder() != null && d.getServiceOrder().getCustomer() != null) {
+                    debtCustomerName = d.getServiceOrder().getCustomer().getNombre();
+                } else {
+                    debtCustomerName = "Cliente genérico";
+                }
+
                 return new DebtDTO(
                         d.getId(),
                         d.getTotalAmount(),
                         d.getPendingAmount(),
-                        d.getPaid(), // 👈 ya tienes el campo paid en la entidad
-                        d.getSale() != null ? d.getSale().getCustomer().getNombre() : null,
+                        d.getPaid(),
+                        debtCustomerName,
                         payments
                 );
             }).collect(Collectors.toList());

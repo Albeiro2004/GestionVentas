@@ -17,6 +17,8 @@ public class Worker {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long documento;
     private String name;
     private String specialty;
+    private Double commission;
 }

@@ -9,4 +9,5 @@ public record DebtDTO(
         Boolean paid,
         String customerName,
         List<PaymentDTO> payments
+
 ) {}
