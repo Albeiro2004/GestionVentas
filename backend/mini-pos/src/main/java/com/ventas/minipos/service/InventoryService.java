@@ -1,11 +1,9 @@
 package com.ventas.minipos.service;
 
-import com.ventas.minipos.domain.Product;
-import com.ventas.minipos.domain.Purchase;
-import com.ventas.minipos.domain.PurchaseItem;
-import com.ventas.minipos.domain.Sale;
-import com.ventas.minipos.domain.SaleItem;
-import com.ventas.minipos.dto.PurchaseRequest;
+import com.ventas.minipos.domain.*;
+import com.ventas.minipos.dto.ListProductsDTO;
+import com.ventas.minipos.dto.ProductCreateRequest;
+import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
 import com.ventas.minipos.repo.SaleRepository;
@@ -13,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class InventoryService {
@@ -22,13 +22,15 @@ public class InventoryService {
     private final ProductRepository productRepository;
     private final PurchaseRepository purchaseRepository;
     private final SaleRepository saleRepository;
+    private final InventoryRepository inventoryRepository;
 
     public InventoryService(ProductRepository productRepository,
                             PurchaseRepository purchaseRepository,
-                            SaleRepository saleRepository) {
+                            SaleRepository saleRepository, InventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
         this.purchaseRepository = purchaseRepository;
         this.saleRepository = saleRepository;
+        this.inventoryRepository = inventoryRepository;
     }
     public Product findProductById(String id) {
         return productRepository.findById(id)
@@ -36,12 +38,37 @@ public class InventoryService {
     }
 
     // Productos
-    public List<Product> listProducts() {
-        return productRepository.findAll();
+    public List<ListProductsDTO> listProducts() {
+        return productRepository.listProducts();
     }
 
-    public Product saveProduct(Product product) {
-        return productRepository.save(product);
+    @Transactional
+    public Product createProductWithInventory(ProductCreateRequest request) {
+        // 1. Validar datos
+        if (request.getStock() == null || request.getStock() < 0) {
+            throw new IllegalArgumentException("El stock debe ser un número >= 0");
+        }
+        if (request.getLocation() == null || request.getLocation().trim().isEmpty()) {
+            throw new IllegalArgumentException("La ubicación es obligatoria");
+        }
+
+        Product product = new Product();
+        product.setId(request.getId());
+        product.setNombre(request.getNombre());
+        product.setMarca(request.getMarca());
+        product.setPrecioCompra(request.getPrecioCompra());
+        product.setPrecioVenta(request.getPrecioVenta());
+        product.setCreadoEn(Instant.now());
+        product.setActualizadoEn(Instant.now());
+        Product savedProduct = productRepository.save(product);
+
+        Inventory inventory = new Inventory();
+        inventory.setProduct(savedProduct);
+        inventory.setLocation(request.getLocation().trim());
+        inventory.setStock(request.getStock());
+        inventoryRepository.save(inventory);
+
+        return savedProduct;
     }
 
     public Product updateProduct(Product product) {
@@ -49,12 +76,32 @@ public class InventoryService {
         existing.setNombre(product.getNombre());
         existing.setPrecioCompra(product.getPrecioCompra());
         existing.setPrecioVenta(product.getPrecioVenta());
-        existing.setStock(product.getStock());
         return productRepository.save(existing);
     }
 
     public void deleteProduct(String id) {
         Product existing = findProductById(id);
+
+        // ❗ Validar uso en servicios
+        long serviceCount = productRepository.countServiceProductsByProductId(existing.getId());
+        if (serviceCount > 0) {
+            throw new IllegalStateException("No se puede eliminar el producto. Está siendo usado en " + serviceCount + " servicios.");
+        }
+
+        // ❗ Validar uso en ventas
+        long saleItemCount = productRepository.countSaleItemsByProductId(existing.getId());
+        if (saleItemCount > 0) {
+            throw new IllegalStateException("No se puede eliminar el producto. Está siendo usado en " + saleItemCount + " ventas.");
+        }
+
+        // 🔍 Eliminar inventario
+        Inventory inventory = inventoryRepository.findByProductId(existing.getId())
+                .orElse(null);
+        if (inventory != null) {
+            inventoryRepository.delete(inventory);
+        }
+
+        // ✅ Eliminar producto
         productRepository.delete(existing);
     }
 
@@ -73,7 +120,16 @@ public class InventoryService {
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + item.getProduct().getId()));
 
             // Actualizar stock
-            product.setStock(product.getStock() + item.getCantidad());
+            Optional<Inventory> optionalInventory = inventoryRepository.findByProduct(product);
+            Inventory inventory = optionalInventory.orElseGet(() -> {
+                Inventory newInventory = new Inventory();
+                newInventory.setProduct(product);
+                newInventory.setStock(0);
+                newInventory.setLocation("Zona no definida");
+                return newInventory;
+            });
+
+            inventory.setStock(inventory.getStock()+item.getCantidad());
             productRepository.save(product);
 
             // Asignar producto al item y calcular subtotal
@@ -92,20 +148,6 @@ public class InventoryService {
         return purchaseRepository.save(purchase);
     }
 
-
-    // Ventas
-    @Transactional
-    public Sale addSale(Sale sale) {
-        for (SaleItem item : sale.getItems()) {
-            Product product = productRepository.findById(item.getProduct().getId()).orElseThrow();
-            if (product.getStock() < item.getCantidad()) {
-                throw new RuntimeException("Stock insuficiente para producto: " + product.getNombre());
-            }
-            product.setStock(product.getStock() - item.getCantidad());
-            productRepository.save(product);
-        }
-        return saleRepository.save(sale);
-    }
     public List<Purchase> listPurchases() {
         return purchaseRepository.findAll();
     }

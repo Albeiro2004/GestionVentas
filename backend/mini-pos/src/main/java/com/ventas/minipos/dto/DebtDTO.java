@@ -8,6 +8,7 @@ public record DebtDTO(
         Double pendingAmount,
         Boolean paid,
         String customerName,
+        String description,
         List<PaymentDTO> payments
 
 ) {}

@@ -34,7 +34,12 @@ public class DebtController {
                 d.getTotalAmount(),
                 d.getPendingAmount(),
                 d.getPaid(),
-                d.getSale() != null ? d.getSale().getCustomer().getNombre() : null,
+                d.getSale() != null && d.getSale().getCustomer() != null
+                        ? d.getSale().getCustomer().getNombre()
+                        : (d.getServiceOrder() != null && d.getServiceOrder().getCustomer() != null
+                        ? d.getServiceOrder().getCustomer().getNombre()
+                        : "Cliente no disponible"),
+                d.getDescription(),
                 d.getPayments().stream()
                         .map(p -> new PaymentDTO(p.getId(), p.getAmount(), p.getPaymentDate()))
                         .toList()
@@ -95,6 +100,7 @@ public class DebtController {
                         d.getPendingAmount(),
                         d.getPaid(),
                         debtCustomerName,
+                        d.getDescription(),
                         payments
                 );
             }).collect(Collectors.toList());

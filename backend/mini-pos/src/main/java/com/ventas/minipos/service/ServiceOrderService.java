@@ -27,6 +27,7 @@ public class ServiceOrderService {
     private final ProductRepository productRepository;
     private final SaleRepository saleRepository;
     private final UserRepository userRepository;
+    private final InventoryRepository inventoryRepository;
 
     @Transactional
     public ServiceOrder registerService(ServiceOrderRequest request) {
@@ -84,6 +85,11 @@ public class ServiceOrderService {
             }
         }
 
+        // AÑADIMOS ESTO PARA OBTENER LA UBICACIÓN DE VENTA
+        // Asume que la ubicación viene de una variable o del contexto de la aplicación
+        // Si no, podrías pasarlo como un parámetro en la solicitud, ej: request.getSaleLocation()
+        // En este ejemplo, lo he añadido como un parámetro del método `registerService`.
+
         for (ProductDTO item : request.getProducts()) {
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
@@ -91,11 +97,18 @@ public class ServiceOrderService {
             if (item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
             }
-            if (item.getQuantity() > product.getStock()) {
-                throw new IllegalArgumentException("Stock insuficiente para: " + product.getNombre());
+
+            // 🔄 VALIDACIÓN Y ACTUALIZACIÓN DEL STOCK EN LA TABLA INVENTORY
+            Optional<Inventory> optionalInventory = inventoryRepository.findByProduct(product);
+            Inventory inventory = optionalInventory.orElseThrow(() ->
+                    new IllegalArgumentException("No se encontró inventario para el producto: " + product.getNombre()));
+
+            if (item.getQuantity() > inventory.getStock()) {
+                throw new IllegalArgumentException("Stock insuficiente para: " + product.getNombre() + " en la ubicación: " + inventory.getLocation());
             }
 
-            product.setStock(product.getStock() - item.getQuantity());
+            inventory.setStock(inventory.getStock() - item.getQuantity());
+            inventoryRepository.save(inventory);
 
             order.addproduct(product, item.getQuantity());
 
@@ -164,7 +177,7 @@ public class ServiceOrderService {
 
     // 🔎 Helper para identificar cliente genérico
     private boolean isGenericCustomer(Customer customer) {
-        return "0000000000".equals(customer.getDocumento());
+        return "0".equals(customer.getDocumento());
     }
 }
 

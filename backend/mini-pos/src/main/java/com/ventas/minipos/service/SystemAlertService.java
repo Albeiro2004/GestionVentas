@@ -1,13 +1,12 @@
 package com.ventas.minipos.service;
 
-import com.ventas.minipos.domain.Product;
 import com.ventas.minipos.dto.LowStockProductDTO;
 import com.ventas.minipos.dto.SystemAlertResponse;
+import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.util.TimeUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +14,18 @@ import java.util.List;
 public class SystemAlertService {
 
     private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
 
-    public SystemAlertService(ProductRepository productRepository) {
+    public SystemAlertService(ProductRepository productRepository, InventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     public List<SystemAlertResponse> getSystemAlerts() {
         List<SystemAlertResponse> alerts = new ArrayList<>();
 
         // 1. Stock bajo
-        List<LowStockProductDTO> lowStockProducts = productRepository.findLowStock(5);
+        List<LowStockProductDTO> lowStockProducts = inventoryRepository.findLowStock(2);
         for (LowStockProductDTO product : lowStockProducts) {
             alerts.add(new SystemAlertResponse(
                     "Stock Bajo",

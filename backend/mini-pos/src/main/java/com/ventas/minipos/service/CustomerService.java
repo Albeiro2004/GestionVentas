@@ -17,7 +17,7 @@ public class CustomerService {
         return clienteRepository.searchSuggestions(query);
     }
     public Customer getGenericCustomer() {
-        return clienteRepository.findByDocumento("0000000000") // 👈 usa un doc fijo
+        return clienteRepository.findByDocumento("0") // 👈 usa un doc fijo
                 .orElseThrow(() -> new RuntimeException("Cliente genérico no existe en BD"));
     }
 

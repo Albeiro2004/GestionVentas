@@ -1,11 +1,13 @@
 package com.ventas.minipos.service;
 
+import com.ventas.minipos.domain.Inventory;
 import com.ventas.minipos.domain.Product;
 import com.ventas.minipos.domain.Sale;
 import com.ventas.minipos.domain.SaleItem;
 import com.ventas.minipos.dto.*;
 import com.ventas.minipos.exception.BusinessException;
 import com.ventas.minipos.exception.SaleDeletionException;
+import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.SaleItemRepository;
 import com.ventas.minipos.repo.SaleRepository;
@@ -29,7 +31,7 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final ProductRepository productRepository;
     private final SaleItemRepository saleItemRepository;
-
+    private final InventoryRepository inventoryRepository;
 
 
     @Transactional(readOnly = true)
@@ -42,19 +44,31 @@ public class SaleService {
         Sale sale = saleRepository.findById(saleId)
                 .orElseThrow(() -> new BusinessException("Factura no encontrada"));
 
-        // Verificar si la factura es del día actual
+        // ✅ Verificar si la factura es del día actual
         LocalDate today = LocalDate.now();
-        LocalDate saleDate = sale.getSaleDate().toLocalDate(); // convertimos a LocalDate para ignorar horas
+        LocalDate saleDate = sale.getSaleDate().toLocalDate();
 
         if (!saleDate.isEqual(today)) {
-            throw new SaleDeletionException("Solo se pueden eliminar facturas del día actual \nConsulta con el Desarrollador para Proceder con esta Acción.");
+            throw new SaleDeletionException("Solo se pueden eliminar facturas del día actual. \nConsulta con el Desarrollador para Proceder con esta Acción.");
         }
 
-        // 🔄 Devolver stock de cada producto
+        // 🔄 Devolver stock a la tabla de inventario
         sale.getItems().forEach(item -> {
             Product product = item.getProduct();
-            product.setStock(product.getStock() + item.getCantidad());
-            productRepository.save(product);
+            Integer cantidadVendida = item.getCantidad();
+
+            // 🔍 Asume que la venta ocurrió desde una ubicación por defecto, como "Almacén Principal"
+            String defaultLocation = "Almacén Principal";
+
+            // 📈 Buscar el registro de inventario para el producto y la ubicación
+            Inventory inventoryItem = inventoryRepository.findByProduct(product)
+                    .orElse(null); // Puedes manejar un caso en el que no se encuentre el registro de inventario
+
+            if (inventoryItem != null) {
+                // ✅ Actualizar el stock
+                inventoryItem.setStock(inventoryItem.getStock() + cantidadVendida);
+                inventoryRepository.save(inventoryItem);
+            }
         });
 
         // 🗑️ Eliminar factura y sus items (en cascada si está configurado)

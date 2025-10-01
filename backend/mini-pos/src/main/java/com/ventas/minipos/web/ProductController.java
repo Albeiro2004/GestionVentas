@@ -1,9 +1,13 @@
 package com.ventas.minipos.web;
 
 import com.ventas.minipos.domain.Product;
+import com.ventas.minipos.dto.ListProductsDTO;
+import com.ventas.minipos.dto.ProductCreateRequest;
 import com.ventas.minipos.service.InventoryService;
 import com.ventas.minipos.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,13 +27,14 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAllProducts() {
+    public List<ListProductsDTO> getAllProducts() {
         return inventoryService.listProducts();
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return inventoryService.saveProduct(product);
+    public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductCreateRequest request) {
+        Product product = inventoryService.createProductWithInventory(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
 
     @PutMapping("/{id}")

@@ -1,16 +1,15 @@
 package com.ventas.minipos.web;
 
+import com.ventas.minipos.domain.*;
 import com.ventas.minipos.dto.ErrorResponse;
 import com.ventas.minipos.dto.SaleDTO;
 import com.ventas.minipos.dto.SaleItemDTO;
 import com.ventas.minipos.dto.SaleRequest;
 import com.ventas.minipos.dto.SaleRequest.Item;
-import com.ventas.minipos.domain.*;
 import com.ventas.minipos.repo.*;
 import com.ventas.minipos.service.SaleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,20 +26,12 @@ import java.util.*;
 public class SaleController {
 
     private final SaleService saleService;
-
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private SaleRepository saleRepository, invoiceRepository;
-
-    @Autowired
-    private DebtRepository debtRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final SaleRepository saleRepository;
+    private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final DebtRepository debtRepository;
+    private final InventoryRepository inventoryRepository; // 👈 NUEVO
 
     @Transactional
     @PostMapping
@@ -81,23 +72,22 @@ public class SaleController {
             List<SaleItem> saleItems = new ArrayList<>();
             BigDecimal totalSale = BigDecimal.ZERO;
 
-            // 📦 Validar stock antes de descontar
-            for (Item itemRequest : saleRequest.getItems()) {
-                Product product = productRepository.findById(itemRequest.getProductId())
-                        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + itemRequest.getProductId()));
-
-                if (itemRequest.getCantidad() > product.getStock()) {
-                    throw new IllegalArgumentException("Stock insuficiente para el producto: " + product.getNombre());
-                }
-            }
-
             // ✅ Descontar stock y crear ítems
             for (Item itemRequest : saleRequest.getItems()) {
                 Product product = productRepository.findById(itemRequest.getProductId())
                         .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + itemRequest.getProductId()));
 
-                product.setStock(product.getStock() - itemRequest.getCantidad());
-                productRepository.save(product);
+                // 🔄 Validación de stock con la nueva lógica de INVENTARIO
+                Inventory inventory = inventoryRepository.findByProduct(product)
+                        .orElseThrow(() -> new IllegalArgumentException("No se encontró inventario para el producto: " + product.getNombre()));
+
+                if (itemRequest.getCantidad() > inventory.getStock()) {
+                    throw new IllegalArgumentException("Stock insuficiente para el producto: " + product.getNombre() + " en la ubicación: " + inventory.getLocation());
+                }
+
+                // 🔄 Descontar stock de la tabla INVENTORY
+                inventory.setStock(inventory.getStock() - itemRequest.getCantidad());
+                inventoryRepository.save(inventory);
 
                 BigDecimal subtotal = itemRequest.getPrecioUnitario()
                         .multiply(BigDecimal.valueOf(itemRequest.getCantidad()))
@@ -164,7 +154,7 @@ public class SaleController {
 
     // 🔎 Helper para identificar cliente genérico
     private boolean isGenericCustomer(Customer customer) {
-        return "0000000000".equals(customer.getDocumento());
+        return "0".equals(customer.getDocumento());
     }
 
     @GetMapping("/invoices")
@@ -197,6 +187,4 @@ public class SaleController {
         List<SaleItemDTO> items = saleService.getSaleItems(id);
         return ResponseEntity.ok(items);
     }
-
-
 }

@@ -26,20 +26,11 @@ public class Product {
     @Min(0)
     private BigDecimal precioVenta;
 
-    @Min(0)
-    private Integer stock;
+    private String marca;
 
     private Instant creadoEn;
 
     private Instant actualizadoEn;
-
-    @PrePersist
-    void prePersist() {
-        Instant now = Instant.now();
-        if (creadoEn == null) creadoEn = now;
-        actualizadoEn = now;
-        if (stock == null) stock = 0;
-    }
 
     @PreUpdate
     void preUpdate() {
