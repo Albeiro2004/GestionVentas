@@ -14,6 +14,7 @@ com/ventas/minipos/domain/Worker.class
 com/ventas/minipos/repo/ServiceOrderRepository.class
 com/ventas/minipos/dto/ServiceHistoryDTO.class
 com/ventas/minipos/repo/WorkerPaymentRepository.class
+com/ventas/minipos/repo/ServiceProductRepository.class
 com/ventas/minipos/service/PurchaseService.class
 com/ventas/minipos/dto/ProductCreateRequest.class
 com/ventas/minipos/dto/PayWorkerRequest.class

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/Ventas/services")
@@ -37,6 +38,16 @@ public class ServiceOrderController {
         );
 
         return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteServiceOrder(@PathVariable Long id) {
+        try {
+            serviceOrderService.deleteServiceOrder(id);
+            return ResponseEntity.ok(Map.of("message", "Servicio eliminado correctamente"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
 }

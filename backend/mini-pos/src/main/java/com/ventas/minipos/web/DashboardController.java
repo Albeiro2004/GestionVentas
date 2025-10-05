@@ -1,4 +1,3 @@
-// src/main/java/com/tuproyecto/controller/DashboardController.java
 
 package com.ventas.minipos.web;
 

@@ -22,10 +22,6 @@ public class DebtController {
     private final DebtRepository debtRepository;
     private final PaymentRepository paymentRepository;
 
-    /**
-     * 📌 Devuelve las deudas agrupadas por cliente.
-     * GET /Ventas/debts/grouped
-     */
     @GetMapping("/all")
     public List<DebtDTO> getAllDebts() {
         List<Debt> debts = debtRepository.findAllWithPaymentsAndSaleAndCustomer();
@@ -115,9 +111,6 @@ public class DebtController {
         return result;
     }
 
-    /**
-     * 📌 Listar abonos de una deuda
-     */
     @GetMapping("/{debtId}/payments")
     public List<PaymentDTO> getPaymentsByDebt(@PathVariable Long debtId) {
         Debt debt = debtRepository.findById(debtId)
@@ -173,9 +166,6 @@ public class DebtController {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 📌 Registrar un abono
-     */
     @PostMapping("/{debtId}/payments")
     public PaymentDTO addPayment(@PathVariable Long debtId, @RequestBody PaymentDTO paymentRequest) {
         Debt debt = debtRepository.findById(debtId)

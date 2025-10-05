@@ -66,6 +66,7 @@
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/SaleItemRepository.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/SaleRepository.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/ServiceOrderRepository.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/ServiceProductRepository.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/UserRepository.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/WorkerPaymentRepository.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/WorkerRepository.java

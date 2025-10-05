@@ -32,6 +32,7 @@ public class ServiceOrderService {
     private final SaleRepository saleRepository;
     private final UserRepository userRepository;
     private final InventoryRepository inventoryRepository;
+    private final ServiceProductRepository serviceProductRepository;
 
     @Transactional
     public ServiceOrder registerService(ServiceOrderRequest request) {
@@ -250,6 +251,34 @@ public class ServiceOrderService {
         return dto;
     }
 
+    @Transactional
+    public void deleteServiceOrder(Long id) {
+        ServiceOrder order = orderRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+
+        LocalDateTime fechaServicio = order.getServiceDate();
+        LocalDate fechaHoy = LocalDate.now();
+
+        if (!fechaServicio.toLocalDate().isEqual(fechaHoy)) {
+            throw new RuntimeException("Solo se pueden eliminar servicios del día actual");
+        }
+
+        // Recuperar los productos del servicio
+        List<ServiceProduct> usedProducts = serviceProductRepository.findByServiceOrder(order);
+
+        // Devolver productos al inventario
+        for (ServiceProduct sp : usedProducts) {
+            Inventory inv = inventoryRepository.findByProduct(sp.getProduct())
+                    .orElseThrow(() -> new RuntimeException("Inventario no encontrado para el producto " + sp.getProduct().getId()));
+
+            inv.setStock(inv.getStock() + sp.getQuantity());
+            inventoryRepository.save(inv);
+        }
+
+        // Eliminar primero los service_product y luego el service_order
+        serviceProductRepository.deleteAll(usedProducts);
+        orderRepo.delete(order);
+    }
 
 }
 
