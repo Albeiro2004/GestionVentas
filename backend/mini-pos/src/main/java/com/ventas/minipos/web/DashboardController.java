@@ -36,7 +36,6 @@ public class DashboardController {
         this.systemAlertService = systemAlertService;
     }
 
-    // Ventas por periodo
     @GetMapping("/dashboard/sales")
     public Map<String, Object> getSalesSummary(@RequestParam String period) {
         Double totalActual = saleService.sumVentasByPeriod(period);
@@ -51,7 +50,6 @@ public class DashboardController {
         );
     }
 
-    // Egresos
     @GetMapping("/dashboard/expenses")
     public Map<String, Object> getExpensesSummary(@RequestParam String period) {
         Double totalActual = purchaseService.sumVentasByPeriod(period);
