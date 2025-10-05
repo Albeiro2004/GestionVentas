@@ -21,7 +21,7 @@ public class OpenCorsConfig {
 
         // Especifica el origen exacto de tu frontend.
         // **IMPORTANTE**: Cambia http://localhost:8081 a la URL real de tu aplicación Vue.js en producción.
-        config.setAllowedOriginPatterns(List.of("http://localhost:8081", "https://sobre-ruedas-35414.web.app", "https://sobre-ruedas-35414.firebaseapp.com"));
+        config.setAllowedOriginPatterns(List.of("http://localhost:8081", "https://sobre-ruedas-35414.web.app", "https://sobre-ruedas-35414.firebaseapp.com", "https://sobre-ruedas.alvenips.com"));
 
         // Estos métodos y cabeceras son seguros con un origen específico.
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
