@@ -69,7 +69,6 @@ public class DashboardController {
         return Map.of("total_products", total, "change", 0);
     }
 
-    // Clientes
     @GetMapping("/dashboard/customers")
     public Map<String, Object> getCustomersSummary() {
         Long total = customerRepository.count()-1;
