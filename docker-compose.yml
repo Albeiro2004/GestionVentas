@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sobre_ruedas_backend
+    restart: always
+    ports:
+      - "${APP_PORT}:10000"
+    env_file:
+      - .env
+    networks:
+      - sobre_red
+
+networks:
+  sobre_red:
+    driver: bridge
