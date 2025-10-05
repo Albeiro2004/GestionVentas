@@ -1,0 +1,21 @@
+# 🧠 Archivos de entorno y configuración local
+.env
+*.properties
+
+# 🚫 Archivos compilados y temporales
+target/
+*.class
+*.pyc
+__pycache__/
+
+# 🧰 Archivos de IDEs
+.vscode/
+.idea/
+*.iml
+
+# ⚙️ Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# 🚀 Archivos de logs
+*.log
