@@ -14,6 +14,7 @@ public interface CustomerRepository extends JpaRepository<com.ventas.minipos.dom
     @Query("SELECT c FROM Customer c WHERE LOWER(c.nombre) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "OR LOWER(c.documento) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<Customer> searchSuggestions(@Param("query") String query);
+
     Optional<Customer> findByDocumento(String documento);
 
 }

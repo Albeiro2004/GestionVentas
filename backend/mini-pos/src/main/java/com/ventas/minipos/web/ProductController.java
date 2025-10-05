@@ -52,7 +52,7 @@ public class ProductController {
     }
 
     @GetMapping("/suggestions")
-    public ResponseEntity<List<Product>> getProductSuggestions(@RequestParam String query) {
+    public ResponseEntity<List<ListProductsDTO>> getProductSuggestions(@RequestParam String query) {
         if (query.length() < 2) {
             return ResponseEntity.ok(Collections.emptyList());
         }

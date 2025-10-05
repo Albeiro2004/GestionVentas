@@ -2,6 +2,8 @@ package com.ventas.minipos.service;
 
 import com.ventas.minipos.domain.*;
 import com.ventas.minipos.dto.ProductDTO;
+import com.ventas.minipos.dto.ProductServiceDTO;
+import com.ventas.minipos.dto.ServiceHistoryDTO;
 import com.ventas.minipos.dto.ServiceOrderRequest;
 import com.ventas.minipos.repo.*;
 import jakarta.transaction.Transactional;
@@ -12,9 +14,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Optional;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -179,5 +183,73 @@ public class ServiceOrderService {
     private boolean isGenericCustomer(Customer customer) {
         return "0".equals(customer.getDocumento());
     }
+
+    public List<ServiceHistoryDTO> getFilteredServices(String startDateStr, String endDateStr, Long workerId, String customerId) {
+
+        LocalDate startDate = LocalDate.parse(startDateStr);
+        LocalDate endDate = LocalDate.parse(endDateStr);
+
+        // Convertir a LocalDateTime: inicio del día y fin del día
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // 23:59:59.999999999
+
+        List<ServiceOrder> orders = orderRepo.findFiltered(
+                startDateTime, endDateTime, workerId, customerId
+        );
+
+        // Precargar todos los clientes en un mapa para evitar múltiples queries
+        List<String> customerIds = orders.stream()
+                .map(ServiceOrder::getCustomer)
+                .filter(Objects::nonNull)
+                .map(Customer::getDocumento)
+                .filter(doc -> doc != null && !doc.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<String, Customer> customerMap = customerRepository.findAllById(customerIds).stream()
+                .collect(Collectors.toMap(Customer::getDocumento, c -> c));
+
+        return orders.stream().map(order -> {
+            ServiceHistoryDTO dto = new ServiceHistoryDTO();
+            dto.setId(order.getId());
+            dto.setServiceDate(order.getServiceDate().toLocalDate());
+            dto.setDescription(order.getDescription());
+
+            // Asignar nombre del cliente
+            if (order.getCustomer().getDocumento() != null) {
+                Customer customer = customerMap.get(order.getCustomer().getDocumento());
+                dto.setCustomerName(customer != null ? customer.getNombre() : "N/A");
+            } else {
+                dto.setCustomerName("N/A");
+            }
+
+            dto.setTotal(order.getTotalPrice());
+            dto.setWorkerShare(order.getWorkerShare());
+            dto.setWorkshopShare(order.getWorkshopShare());
+
+            // Mapear productos
+            List<ProductServiceDTO> productDtos = order.getProducts().stream()
+                    .map(this::toProductDto)
+                    .toList();
+            dto.setProducts(productDtos);
+
+            return dto;
+        }).toList();
+    }
+
+    private ProductServiceDTO toProductDto(ServiceProduct sp) {
+        ProductServiceDTO dto = new ProductServiceDTO();
+        dto.setId(sp.getId());
+        dto.setQuantity(sp.getQuantity());
+        dto.setSubtotal(sp.getProduct().getPrecioVenta());
+        if (sp.getProduct() != null) {
+            dto.setProductName(sp.getProduct().getNombre());
+        } else {
+            dto.setProductName("Producto eliminado");
+        }
+        return dto;
+    }
+
+
 }
 
