@@ -226,7 +226,7 @@ public class SaleService {
                 .collect(Collectors.toList());
     }
 
-    private List<Double> fillWeekData(List<Object[]> rawData) {
+    public List<Double> fillWeekData(List<Object[]> rawData) {
         Map<Integer, Double> dataMap = rawData.stream()
                 .collect(Collectors.toMap(
                         r -> ((Number) r[0]).intValue(),

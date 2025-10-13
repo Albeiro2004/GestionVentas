@@ -5,11 +5,14 @@ import com.ventas.minipos.domain.Access;
 import com.ventas.minipos.domain.Role;
 import com.ventas.minipos.dto.UserDTO;
 import com.ventas.minipos.dto.AccessDTO;
+import com.ventas.minipos.exception.BusinessException;
 import com.ventas.minipos.repo.UserRepository;
 import com.ventas.minipos.repo.AccessRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -51,12 +54,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void eliminarUsuario(Long id) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String usernameActual = auth.getName();
+
+        User usuarioActual = userRepository.findByUsername(usernameActual)
+                .orElseThrow(() -> new BusinessException("User not found!"));
+
+        if (usuarioActual.getId().equals(id)){
+            throw new BusinessException("¡No Puedes Eliminar tu Usuario!");
+        }
         userRepository.deleteById(id);
     }
 
     @Override
     public List<AccessDTO> obtenerHistorial(Long id) {
-        List<Access> accesos = accessRepository.findByUser_Id(id);
+        List<Access> accesos = accessRepository.findTop10ByUser_IdOrderByFechaDesc(id);
         return accesos.stream()
                 .map(userMapper::toAccessDTO)
                 .toList();
@@ -96,7 +109,7 @@ public class UserServiceImpl implements UserService {
         accessRepository.save(acceso);
     }
     public void registrarLogout(String username) {
-        // Obtener la IP del cliente (si tienes HttpServletRequest disponible
+
         String ip = req.getRemoteAddr();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));

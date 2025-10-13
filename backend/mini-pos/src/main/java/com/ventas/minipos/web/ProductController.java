@@ -7,6 +7,8 @@ import com.ventas.minipos.service.InventoryService;
 import com.ventas.minipos.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,11 @@ public class ProductController {
 
     public ProductController(InventoryService inventoryService) {
         this.inventoryService = inventoryService;
+    }
+
+    @GetMapping("/page")
+    public Page<ListProductsDTO> getAllProducts(Pageable pageable) {
+        return inventoryService.listProductsPage(pageable);
     }
 
     @GetMapping

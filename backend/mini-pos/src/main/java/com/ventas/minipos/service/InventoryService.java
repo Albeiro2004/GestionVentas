@@ -7,6 +7,8 @@ import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
 import com.ventas.minipos.repo.SaleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,10 @@ public class InventoryService {
     public Product findProductById(String id) {
         return productRepository.findById(id)
                 .orElse(null); // o lanzar excepción si no existe
+    }
+
+    public Page<ListProductsDTO> listProductsPage(Pageable pageable) {
+        return  productRepository.findAllPage(pageable);
     }
 
     // Productos

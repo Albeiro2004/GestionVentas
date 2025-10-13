@@ -5,9 +5,11 @@ import com.ventas.minipos.dto.SaleResponse;
 import com.ventas.minipos.dto.SystemAlertResponse;
 import com.ventas.minipos.dto.TopProductResponse;
 import com.ventas.minipos.repo.*;
+import com.ventas.minipos.service.DashboardService;
 import com.ventas.minipos.service.PurchaseService;
 import com.ventas.minipos.service.SaleService;
 import com.ventas.minipos.service.SystemAlertService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,8 +27,9 @@ public class DashboardController {
     private final SaleService saleService;
     private final PurchaseService purchaseService;
     private final SystemAlertService systemAlertService;
+    private DashboardService dashboardService;
 
-    public DashboardController(SaleRepository saleRepository, PurchaseRepository purchaseRepository, CustomerRepository customerRepository, ProductRepository productRepository, SaleService saleService, PurchaseService purchaseService, SystemAlertService systemAlertService) {
+    public DashboardController(SaleRepository saleRepository, PurchaseRepository purchaseRepository, CustomerRepository customerRepository, ProductRepository productRepository, SaleService saleService, PurchaseService purchaseService, SystemAlertService systemAlertService, DashboardService dashboardService) {
         this.saleRepository = saleRepository;
         this.purchaseRepository = purchaseRepository;
         this.customerRepository = customerRepository;
@@ -34,6 +37,14 @@ public class DashboardController {
         this.saleService = saleService;
         this.purchaseService = purchaseService;
         this.systemAlertService = systemAlertService;
+        this.dashboardService = dashboardService;
+    }
+
+    @GetMapping("/dashboard/services")
+    public ResponseEntity<SaleResponse> obtenerReporteIngresosServicios(@RequestParam(defaultValue = "year") String period) {
+
+        SaleResponse data = dashboardService.obtenerIngresosServicios(period);
+        return ResponseEntity.ok(data);
     }
 
     @GetMapping("/dashboard/sales")
@@ -62,7 +73,6 @@ public class DashboardController {
         return Map.of("total_expenses", totalActual, "change", cambio);
     }
 
-    // Productos
     @GetMapping("/dashboard/products")
     public Map<String, Object> getProductsSummary() {
         Long total = productRepository.count();
