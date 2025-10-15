@@ -3,6 +3,10 @@ package com.ventas.minipos.web;
 import com.ventas.minipos.domain.Purchase;
 import com.ventas.minipos.dto.PurchaseRequest;
 import com.ventas.minipos.service.InventoryService;
+import com.ventas.minipos.service.PurchaseService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,15 +16,17 @@ import java.util.List;
 public class PurchaseController {
 
     private final InventoryService inventoryService;
+    private final PurchaseService purchaseService;
 
-    public PurchaseController(InventoryService inventoryService) {
+    public PurchaseController(InventoryService inventoryService, PurchaseService purchaseService) {
         this.inventoryService = inventoryService;
+        this.purchaseService = purchaseService;
     }
 
-    // Crear compra
     @PostMapping
-    public Purchase addPurchase(@RequestBody PurchaseRequest request) {
-        return inventoryService.addPurchase(request.toEntity());
+    public ResponseEntity<Purchase> createPurchase(@Valid @RequestBody PurchaseRequest request) {
+        Purchase savedPurchase = inventoryService.addPurchase(request.toPurchase());
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedPurchase);
     }
 
     // Listar todas las compras (historial)

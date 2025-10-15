@@ -3,6 +3,7 @@ package com.ventas.minipos.service;
 import com.ventas.minipos.domain.*;
 import com.ventas.minipos.dto.ListProductsDTO;
 import com.ventas.minipos.dto.ProductCreateRequest;
+import com.ventas.minipos.exception.BusinessException;
 import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
@@ -111,7 +112,6 @@ public class InventoryService {
         productRepository.delete(existing);
     }
 
-    // Compras
     @Transactional
     public Purchase addPurchase(Purchase purchase) {
         if (purchase.getItems() == null) {
@@ -121,36 +121,56 @@ public class InventoryService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (PurchaseItem item : purchase.getItems()) {
-            // Traer el producto desde DB
-            Product product = productRepository.findById(item.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + item.getProduct().getId()));
+            // Validar integridad del ítem
+            if (item.getTipo() == null) {
+                throw new BusinessException("El tipo de ítem es obligatorio");
+            }
 
-            // Actualizar stock
-            Optional<Inventory> optionalInventory = inventoryRepository.findByProduct(product);
-            Inventory inventory = optionalInventory.orElseGet(() -> {
-                Inventory newInventory = new Inventory();
-                newInventory.setProduct(product);
-                newInventory.setStock(0);
-                newInventory.setLocation("Zona no definida");
-                return newInventory;
-            });
+            if (item.getTipo() == ItemType.PRODUCTO) {
+                // Solo para productos: validar y actualizar inventario
+                if (item.getProduct() == null || item.getProduct().getId() == null) {
+                    throw new IllegalArgumentException("Producto es obligatorio para ítems de tipo PRODUCTO");
+                }
 
-            inventory.setStock(inventory.getStock()+item.getCantidad());
-            productRepository.save(product);
+                Product product = productRepository.findById(item.getProduct().getId())
+                        .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + item.getProduct().getId()));
 
-            // Asignar producto al item y calcular subtotal
-            item.setProduct(product);
+                item.setDescripcion("Compra de: " + product.getNombre());
+
+                Optional<Inventory> optionalInventory = inventoryRepository.findByProduct(product);
+                Inventory inventory = optionalInventory.orElseGet(() -> {
+                    Inventory newInventory = new Inventory();
+                    newInventory.setProduct(product);
+                    newInventory.setStock(0);
+                    newInventory.setLocation("Zona no definida");
+                    return newInventory;
+                });
+
+                inventory.setStock(inventory.getStock() + item.getCantidad());
+                inventoryRepository.save(inventory); // 👈 Guardar el inventario, no el producto
+
+                item.setProduct(product);
+            } else {
+                // Para HERRAMIENTA, SERVICIO, OTRO: no hay producto ni inventario
+                if (item.getDescripcion() == null || item.getDescripcion().isBlank()) {
+                    throw new IllegalArgumentException("Descripción es obligatoria para ítems de tipo " + item.getTipo());
+                }
+
+                item.setCantidad(1);
+
+                item.setProduct(null); // Asegurar que no quede residuo
+            }
+
+            // Configurar relaciones y cálculos comunes
             item.setPurchase(purchase);
             item.calcularSubtotal();
 
-            // Sumar al total de la compra
-            total = total.add(item.getSubtotal());
+            if (item.getSubtotal() != null) {
+                total = total.add(item.getSubtotal());
+            }
         }
 
-        // Asignar total a la compra
         purchase.setTotal(total);
-
-        // Guardar la compra completa
         return purchaseRepository.save(purchase);
     }
 

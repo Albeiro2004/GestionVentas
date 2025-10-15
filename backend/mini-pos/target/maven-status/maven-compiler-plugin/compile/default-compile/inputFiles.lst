@@ -13,6 +13,7 @@
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/domain/Customer.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/domain/Debt.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/domain/Inventory.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/domain/ItemType.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/domain/Payment.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/domain/PaymentType.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/domain/Product.java
@@ -40,6 +41,7 @@
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/ProductCreateRequest.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/ProductDTO.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/ProductServiceDTO.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/PurchaseItemRequest.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/PurchaseRequest.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/SaleByDateDTO.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/SaleDTO.java

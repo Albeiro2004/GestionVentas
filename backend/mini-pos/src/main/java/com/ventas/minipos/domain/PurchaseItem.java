@@ -14,16 +14,19 @@ public class PurchaseItem {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne
     @JoinColumn(name = "purchase_id")
     @JsonBackReference
     private Purchase purchase;
 
-
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id",  nullable = true)
     private Product product;
 
+    @Enumerated(EnumType.STRING)
+    private ItemType tipo;
+
+    private String descripcion;
 
     private Integer cantidad;
     private BigDecimal costoUnitario; // costo real de esta compra

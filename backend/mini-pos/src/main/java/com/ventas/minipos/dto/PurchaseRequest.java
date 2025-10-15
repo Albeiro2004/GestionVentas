@@ -6,38 +6,24 @@ import com.ventas.minipos.domain.Product;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PurchaseRequest {
 
-    private List<Item> items;
+    private LocalDateTime date;
+    private List <PurchaseItemRequest> items;
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class Item {
-        private String productId;
-        private Integer cantidad;
-        private Double costoUnitario;
-    }
-
-    // Convierte el DTO a la entidad Purchase
-    public Purchase toEntity() {
+    public Purchase toPurchase() {
         Purchase purchase = new Purchase();
-        if (items != null) {
-            purchase.setItems(new ArrayList<>());
-            for (Item dtoItem : items) {
-                PurchaseItem item = new PurchaseItem();
-                Product product = new Product();
-                product.setId(dtoItem.getProductId());
-                item.setProduct(product);
-                item.setCantidad(dtoItem.getCantidad());
-                item.setCostoUnitario(dtoItem.getCostoUnitario() != null
-                        ? BigDecimal.valueOf(dtoItem.getCostoUnitario())
-                        : BigDecimal.ZERO);
-                purchase.getItems().add(item);
-            }
-        }
+        purchase.setFecha(this.date);
+        purchase.setItems(this.items.stream()
+                .map(PurchaseItemRequest::toPurchaseItem)
+                .collect(Collectors.toList()));
         return purchase;
     }
 

@@ -1,6 +1,7 @@
 com/ventas/minipos/web/ServiceOrderController.class
 com/ventas/minipos/domain/ServiceProduct.class
 com/ventas/minipos/domain/WorkerPayment.class
+com/ventas/minipos/domain/ItemType.class
 com/ventas/minipos/dto/ListProductsDTO$ListProductsDTOBuilder.class
 com/ventas/minipos/dto/ProductServiceDTO.class
 com/ventas/minipos/dto/ListProductsDTO.class
@@ -27,3 +28,4 @@ com/ventas/minipos/util/TimeUtils.class
 com/ventas/minipos/repo/InventoryRepository.class
 com/ventas/minipos/service/ServiceOrderService.class
 com/ventas/minipos/dto/TopProductResponse.class
+com/ventas/minipos/dto/PurchaseItemRequest.class
