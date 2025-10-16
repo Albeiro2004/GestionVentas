@@ -55,6 +55,7 @@
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/TopProductDTO.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/TopProductResponse.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/UserDTO.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/UserUpdateDTO.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/BusinessException.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/GlobalExceptionHandler.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/SaleDeletionException.java

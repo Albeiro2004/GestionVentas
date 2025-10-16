@@ -7,12 +7,15 @@ import com.ventas.minipos.Jwt.JwtService;
 import com.ventas.minipos.domain.User;
 import com.ventas.minipos.dto.AccessDTO;
 import com.ventas.minipos.dto.UserDTO;
+import com.ventas.minipos.dto.UserUpdateDTO;
 import com.ventas.minipos.repo.UserRepository;
 import com.ventas.minipos.service.UserService;
 import com.ventas.minipos.service.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +31,49 @@ public class UserController {
     private final AuthService authService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> obtenerUsuarioAutenticado(Authentication authentication) {
+        String email = authentication.getName();
+
+        var usuario = userRepository.findByUsername(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        UserDTO dto = new UserDTO(
+                usuario.getId(),
+                usuario.getUsername(),
+                usuario.getName(),
+                usuario.getRole().name()
+        );
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserDTO> actualizarPerfil(@RequestBody UserUpdateDTO datos, Authentication authentication) {
+        String email = authentication.getName();
+
+        var usuario = userRepository.findByUsername(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setName(datos.name());
+
+        if (datos.password() != null && !datos.password().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(datos.password()));
+        }
+
+        userRepository.save(usuario);
+
+        UserDTO dto = new UserDTO(
+                usuario.getId(),
+                usuario.getUsername(),
+                usuario.getName(),
+                usuario.getRole().name()
+        );
+
+        return ResponseEntity.ok(dto);
+    }
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> listarUsuarios() {

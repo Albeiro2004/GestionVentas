@@ -7,6 +7,7 @@ com/ventas/minipos/dto/ProductServiceDTO.class
 com/ventas/minipos/dto/ListProductsDTO.class
 com/ventas/minipos/service/WorkerPaymentService.class
 com/ventas/minipos/domain/Inventory.class
+com/ventas/minipos/dto/UserUpdateDTO.class
 com/ventas/minipos/web/WorkerController.class
 com/ventas/minipos/dto/ServiceOrderRequest.class
 com/ventas/minipos/web/WorkerPaymentController.class
