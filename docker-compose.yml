@@ -11,6 +11,8 @@ services:
       - "${APP_PORT}:10000"
     env_file:
       - .env
+    environment:
+      - TZ=America/Bogota
     networks:
       - sobre_red
 
