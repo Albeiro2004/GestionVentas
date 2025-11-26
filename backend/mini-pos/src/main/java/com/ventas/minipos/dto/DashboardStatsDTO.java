@@ -15,7 +15,6 @@ public class DashboardStatsDTO {
     private List<Integer> historialProductos;
     private List<Integer> historialReportes;
 
-    // Getters y setters
     public int getVentas() { return ventas; }
     public void setVentas(int ventas) { this.ventas = ventas; }
 
