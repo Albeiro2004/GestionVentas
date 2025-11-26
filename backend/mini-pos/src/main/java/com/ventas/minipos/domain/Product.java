@@ -15,7 +15,7 @@ public class Product {
 
     @Id
     @Column(length = 40)
-    private String id; // puedes usar código manual (SKU)
+    private String id;
 
     @NotBlank
     private String nombre;

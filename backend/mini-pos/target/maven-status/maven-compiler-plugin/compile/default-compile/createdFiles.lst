@@ -1,5 +1,6 @@
 com/ventas/minipos/web/ServiceOrderController.class
 com/ventas/minipos/domain/ServiceProduct.class
+com/ventas/minipos/factory/ProductFactoryMethod.class
 com/ventas/minipos/domain/WorkerPayment.class
 com/ventas/minipos/domain/ItemType.class
 com/ventas/minipos/dto/ListProductsDTO$ListProductsDTOBuilder.class
@@ -7,7 +8,9 @@ com/ventas/minipos/dto/ProductServiceDTO.class
 com/ventas/minipos/dto/ListProductsDTO.class
 com/ventas/minipos/service/WorkerPaymentService.class
 com/ventas/minipos/domain/Inventory.class
+com/ventas/minipos/dto/ProductFactoryDTO.class
 com/ventas/minipos/dto/UserUpdateDTO.class
+com/ventas/minipos/factory/ProductFactory.class
 com/ventas/minipos/web/WorkerController.class
 com/ventas/minipos/dto/ServiceOrderRequest.class
 com/ventas/minipos/web/WorkerPaymentController.class
@@ -17,6 +20,7 @@ com/ventas/minipos/repo/ServiceOrderRepository.class
 com/ventas/minipos/dto/ServiceHistoryDTO.class
 com/ventas/minipos/repo/WorkerPaymentRepository.class
 com/ventas/minipos/repo/ServiceProductRepository.class
+com/ventas/minipos/dto/ProductFactoryDTO$ProductFactoryDTOBuilder.class
 com/ventas/minipos/service/PurchaseService.class
 com/ventas/minipos/dto/ProductCreateRequest.class
 com/ventas/minipos/dto/PayWorkerRequest.class

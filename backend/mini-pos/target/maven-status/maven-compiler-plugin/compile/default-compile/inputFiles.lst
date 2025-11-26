@@ -40,6 +40,7 @@
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/PaymentDTO.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/ProductCreateRequest.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/ProductDTO.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/ProductFactoryDTO.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/ProductServiceDTO.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/PurchaseItemRequest.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/dto/PurchaseRequest.java
@@ -59,6 +60,8 @@
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/BusinessException.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/GlobalExceptionHandler.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/SaleDeletionException.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/factory/ProductFactory.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/factory/ProductFactoryMethod.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/AccessRepository.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/CustomerRepository.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/repo/DebtRepository.java

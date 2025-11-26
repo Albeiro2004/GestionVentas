@@ -4,6 +4,8 @@ import com.ventas.minipos.domain.*;
 import com.ventas.minipos.dto.ListProductsDTO;
 import com.ventas.minipos.dto.ProductCreateRequest;
 import com.ventas.minipos.exception.BusinessException;
+import com.ventas.minipos.factory.ProductFactory;
+import com.ventas.minipos.factory.ProductFactoryMethod;
 import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
@@ -59,14 +61,9 @@ public class InventoryService {
             throw new IllegalArgumentException("La ubicación es obligatoria");
         }
 
-        Product product = new Product();
-        product.setId(request.getId());
-        product.setNombre(request.getNombre());
-        product.setMarca(request.getMarca());
-        product.setPrecioCompra(request.getPrecioCompra());
-        product.setPrecioVenta(request.getPrecioVenta());
-        product.setCreadoEn(Instant.now());
-        product.setActualizadoEn(Instant.now());
+        ProductFactoryMethod factory = new ProductFactory();
+        Product product = factory.createProduct(request);
+
         Product savedProduct = productRepository.save(product);
 
         Inventory inventory = new Inventory();
