@@ -3,6 +3,7 @@ package com.ventas.minipos.service;
 import com.ventas.minipos.domain.*;
 import com.ventas.minipos.dto.ListProductsDTO;
 import com.ventas.minipos.dto.ProductCreateRequest;
+import com.ventas.minipos.events.CreatedEvent;
 import com.ventas.minipos.exception.BusinessException;
 import com.ventas.minipos.factory.ProductFactory;
 import com.ventas.minipos.factory.ProductFactoryMethod;
@@ -10,13 +11,13 @@ import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
 import com.ventas.minipos.repo.SaleRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,14 +29,17 @@ public class InventoryService {
     private final PurchaseRepository purchaseRepository;
     private final SaleRepository saleRepository;
     private final InventoryRepository inventoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public InventoryService(ProductRepository productRepository,
                             PurchaseRepository purchaseRepository,
-                            SaleRepository saleRepository, InventoryRepository inventoryRepository) {
+                            SaleRepository saleRepository, InventoryRepository inventoryRepository, ApplicationEventPublisher eventPublisher) {
         this.productRepository = productRepository;
         this.purchaseRepository = purchaseRepository;
         this.saleRepository = saleRepository;
         this.inventoryRepository = inventoryRepository;
+        this.eventPublisher = eventPublisher;
+
     }
     public Product findProductById(String id) {
         return productRepository.findById(id)
@@ -53,7 +57,7 @@ public class InventoryService {
 
     @Transactional
     public Product createProductWithInventory(ProductCreateRequest request) {
-        // 1. Validar datos
+
         if (request.getStock() == null || request.getStock() < 0) {
             throw new IllegalArgumentException("El stock debe ser un número >= 0");
         }
@@ -71,6 +75,8 @@ public class InventoryService {
         inventory.setLocation(request.getLocation().trim());
         inventory.setStock(request.getStock());
         inventoryRepository.save(inventory);
+
+        eventPublisher.publishEvent(new CreatedEvent(this, savedProduct));
 
         return savedProduct;
     }

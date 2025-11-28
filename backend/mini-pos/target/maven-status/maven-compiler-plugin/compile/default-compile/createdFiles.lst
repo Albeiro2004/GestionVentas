@@ -15,13 +15,17 @@ com/ventas/minipos/web/WorkerController.class
 com/ventas/minipos/dto/ServiceOrderRequest.class
 com/ventas/minipos/web/WorkerPaymentController.class
 com/ventas/minipos/dto/SaleResponse.class
+com/ventas/minipos/service/TelegramService.class
 com/ventas/minipos/domain/Worker.class
+com/ventas/minipos/events/CreatedEvent.class
 com/ventas/minipos/repo/ServiceOrderRepository.class
 com/ventas/minipos/dto/ServiceHistoryDTO.class
 com/ventas/minipos/repo/WorkerPaymentRepository.class
 com/ventas/minipos/repo/ServiceProductRepository.class
+com/ventas/minipos/observers/TelegramNotifier.class
 com/ventas/minipos/dto/ProductFactoryDTO$ProductFactoryDTOBuilder.class
 com/ventas/minipos/service/PurchaseService.class
+com/ventas/minipos/observers/AuditObserver.class
 com/ventas/minipos/dto/ProductCreateRequest.class
 com/ventas/minipos/dto/PayWorkerRequest.class
 com/ventas/minipos/dto/LowStockProductDTO.class

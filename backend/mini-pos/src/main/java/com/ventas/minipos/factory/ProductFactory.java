@@ -2,7 +2,6 @@ package com.ventas.minipos.factory;
 
 import com.ventas.minipos.domain.Product;
 import com.ventas.minipos.dto.ProductCreateRequest;
-import com.ventas.minipos.dto.ProductFactoryDTO;
 
 import java.time.Instant;
 import java.util.UUID;
