@@ -3,9 +3,11 @@ package com.ventas.minipos.web;
 import com.ventas.minipos.domain.Product;
 import com.ventas.minipos.dto.ListProductsDTO;
 import com.ventas.minipos.dto.ProductCreateRequest;
+import com.ventas.minipos.facade.ProductCreationFacade;
 import com.ventas.minipos.service.InventoryService;
 import com.ventas.minipos.service.ProductService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/Ventas/products")
 public class ProductController {
@@ -23,10 +26,8 @@ public class ProductController {
     @Autowired
     private ProductService productoService;
     private final InventoryService inventoryService;
+    private final ProductCreationFacade productCreationFacade;
 
-    public ProductController(InventoryService inventoryService) {
-        this.inventoryService = inventoryService;
-    }
 
     @GetMapping("/page")
     public Page<ListProductsDTO> getAllProducts(Pageable pageable) {
@@ -40,7 +41,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductCreateRequest request) {
-        Product product = inventoryService.createProductWithInventory(request);
+        Product product = productCreationFacade.createProductWithInventory(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
 

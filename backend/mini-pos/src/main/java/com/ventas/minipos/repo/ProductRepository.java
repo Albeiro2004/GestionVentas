@@ -1,7 +1,6 @@
 
 package com.ventas.minipos.repo;
 
-
 import com.ventas.minipos.domain.Product;
 import com.ventas.minipos.dto.ListProductsDTO;
 import org.springframework.data.domain.Page;
@@ -9,9 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import java.util.List;
-
 
 public interface ProductRepository extends JpaRepository<Product, String> {
     // Buscar productos por nombre o ID
@@ -20,7 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
             "OR LOWER(p.id) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<ListProductsDTO> searchSuggestions(@Param("query") String query);
 
-    // Total de productos
     @Query("SELECT COUNT(p) FROM Product p")
     Long countTotalProducts();
 
@@ -45,7 +41,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     )
     Page<ListProductsDTO> findAllPage(Pageable pageable);
 
-    // En ProductRepository
     @Query("SELECT COUNT(s) FROM ServiceProduct s WHERE s.product.id = :productId")
     long countServiceProductsByProductId(@Param("productId") String productId);
 

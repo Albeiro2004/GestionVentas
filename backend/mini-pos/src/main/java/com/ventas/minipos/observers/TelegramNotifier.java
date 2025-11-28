@@ -14,7 +14,7 @@ public class TelegramNotifier {
 
     @EventListener
     public void onCreated(CreatedEvent event){
-        String msg = "📦 *Nuevo Producto Registrado*\n" +
+        String msg = "📦 Nuevo Registro de Producto:\n\n" +
                 "🆔 ID: " + event.getProduct().getId() + "\n" +
                 "🏷 Nombre: " + event.getProduct().getNombre() + "\n" +
                 "🏭 Marca: " + event.getProduct().getMarca() + "\n" +

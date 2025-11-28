@@ -2,45 +2,28 @@ package com.ventas.minipos.service;
 
 import com.ventas.minipos.domain.*;
 import com.ventas.minipos.dto.ListProductsDTO;
-import com.ventas.minipos.dto.ProductCreateRequest;
-import com.ventas.minipos.events.CreatedEvent;
 import com.ventas.minipos.exception.BusinessException;
-import com.ventas.minipos.factory.ProductFactory;
-import com.ventas.minipos.factory.ProductFactoryMethod;
 import com.ventas.minipos.repo.InventoryRepository;
 import com.ventas.minipos.repo.ProductRepository;
 import com.ventas.minipos.repo.PurchaseRepository;
-import com.ventas.minipos.repo.SaleRepository;
-import org.springframework.context.ApplicationEventPublisher;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@AllArgsConstructor
 @Service
 public class InventoryService {
 
     private final ProductRepository productRepository;
     private final PurchaseRepository purchaseRepository;
-    private final SaleRepository saleRepository;
     private final InventoryRepository inventoryRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
-    public InventoryService(ProductRepository productRepository,
-                            PurchaseRepository purchaseRepository,
-                            SaleRepository saleRepository, InventoryRepository inventoryRepository, ApplicationEventPublisher eventPublisher) {
-        this.productRepository = productRepository;
-        this.purchaseRepository = purchaseRepository;
-        this.saleRepository = saleRepository;
-        this.inventoryRepository = inventoryRepository;
-        this.eventPublisher = eventPublisher;
-
-    }
     public Product findProductById(String id) {
         return productRepository.findById(id)
                 .orElse(null); // o lanzar excepción si no existe
@@ -55,32 +38,6 @@ public class InventoryService {
         return productRepository.listProducts();
     }
 
-    @Transactional
-    public Product createProductWithInventory(ProductCreateRequest request) {
-
-        if (request.getStock() == null || request.getStock() < 0) {
-            throw new IllegalArgumentException("El stock debe ser un número >= 0");
-        }
-        if (request.getLocation() == null || request.getLocation().trim().isEmpty()) {
-            throw new IllegalArgumentException("La ubicación es obligatoria");
-        }
-
-        ProductFactoryMethod factory = new ProductFactory();
-        Product product = factory.createProduct(request);
-
-        Product savedProduct = productRepository.save(product);
-
-        Inventory inventory = new Inventory();
-        inventory.setProduct(savedProduct);
-        inventory.setLocation(request.getLocation().trim());
-        inventory.setStock(request.getStock());
-        inventoryRepository.save(inventory);
-
-        eventPublisher.publishEvent(new CreatedEvent(this, savedProduct));
-
-        return savedProduct;
-    }
-
     public Product updateProduct(Product product) {
         Product existing = findProductById(product.getId());
         existing.setNombre(product.getNombre());
@@ -92,24 +49,18 @@ public class InventoryService {
     public void deleteProduct(String id) {
         Product existing = findProductById(id);
 
-        // ❗ Validar uso en servicios
         long serviceCount = productRepository.countServiceProductsByProductId(existing.getId());
         if (serviceCount > 0) {
             throw new IllegalStateException("No se puede eliminar el producto. Está siendo usado en " + serviceCount + " servicios.");
         }
 
-        // ❗ Validar uso en ventas
         long saleItemCount = productRepository.countSaleItemsByProductId(existing.getId());
         if (saleItemCount > 0) {
             throw new IllegalStateException("No se puede eliminar el producto. Está siendo usado en " + saleItemCount + " ventas.");
         }
 
-        // 🔍 Eliminar inventario
-        Inventory inventory = inventoryRepository.findByProductId(existing.getId())
-                .orElse(null);
-        if (inventory != null) {
-            inventoryRepository.delete(inventory);
-        }
+        inventoryRepository.findByProductId(existing.getId())
+                .ifPresent(inventoryRepository::delete);
 
         // ✅ Eliminar producto
         productRepository.delete(existing);

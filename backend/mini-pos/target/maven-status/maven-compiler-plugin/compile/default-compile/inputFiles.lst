@@ -61,6 +61,7 @@
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/BusinessException.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/GlobalExceptionHandler.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/exception/SaleDeletionException.java
+/home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/facade/ProductCreationFacade.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/factory/ProductFactory.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/factory/ProductFactoryMethod.java
 /home/albeiroluis/Documentos/Programas/GestionVentas/backend/mini-pos/src/main/java/com/ventas/minipos/observers/AuditObserver.java

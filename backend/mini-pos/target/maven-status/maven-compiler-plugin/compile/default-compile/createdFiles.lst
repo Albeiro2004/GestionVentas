@@ -27,6 +27,7 @@ com/ventas/minipos/dto/ProductFactoryDTO$ProductFactoryDTOBuilder.class
 com/ventas/minipos/service/PurchaseService.class
 com/ventas/minipos/observers/AuditObserver.class
 com/ventas/minipos/dto/ProductCreateRequest.class
+com/ventas/minipos/facade/ProductCreationFacade.class
 com/ventas/minipos/dto/PayWorkerRequest.class
 com/ventas/minipos/dto/LowStockProductDTO.class
 com/ventas/minipos/service/SystemAlertService.class
