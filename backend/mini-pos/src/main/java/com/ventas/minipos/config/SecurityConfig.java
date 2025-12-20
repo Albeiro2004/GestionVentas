@@ -32,23 +32,24 @@ public class SecurityConfig {
                                 .requestMatchers("/Ventas/users/logout").permitAll()
 
                                 // Ventas - Facturas
-                                .requestMatchers(HttpMethod.GET, "/Ventas/sales/invoices/**").hasAnyAuthority("USER", "ADMIN")
-                                .requestMatchers("/Ventas/sales/invoices/**").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/Ventas/sales/invoices/**").hasAnyAuthority("USER", "ADMIN","ENGINEER")
+                                .requestMatchers("/Ventas/sales/invoices/**").hasAnyAuthority("ADMIN", "ENGINEER")
 
                                 // Ventas generales
-                                .requestMatchers("/Ventas/sales/**").hasAnyAuthority("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/Ventas/sales").hasAnyAuthority("USER", "ADMIN")
+                                .requestMatchers("/Ventas/sales/**").hasAnyAuthority("USER", "ADMIN", "ENGINEER")
+                                .requestMatchers(HttpMethod.POST, "/Ventas/sales").hasAnyAuthority("USER", "ADMIN", "ENGINEER")
 
                                 // Productos
-                                .requestMatchers("/Ventas/products/**").hasAnyAuthority("USER", "ADMIN")
+                                .requestMatchers("/Ventas/products/**").hasAnyAuthority("USER", "ADMIN", "ENGINEER")
 
                                 // Debts (usuarios solo lectura, admin full)
-                                .requestMatchers(HttpMethod.GET, "/Ventas/debts/**").hasAnyAuthority("USER", "ADMIN")
-                                .requestMatchers("/Ventas/debts/**").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/Ventas/debts/**").hasAnyAuthority("USER", "ADMIN", "ENGINEER")
+                                .requestMatchers("/Ventas/debts/**").hasAnyAuthority("ADMIN", "ENGINEER")
 
                                 // Solo ADMIN
-                                .requestMatchers("/Ventas/users/**").hasAuthority("ADMIN")
-                                .requestMatchers("/Ventas/purchases/**").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/Ventas/users/**").hasAnyAuthority("USER", "ADMIN", "ENGINEER")
+                                .requestMatchers("/Ventas/users/**").hasAuthority("ENGINEER")
+                                .requestMatchers("/Ventas/purchases/**").hasAnyAuthority("ADMIN",  "ENGINEER")
 
                                 // Cualquier otra solicitud autenticada
                                 .anyRequest().authenticated()

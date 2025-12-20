@@ -22,4 +22,9 @@ public class TelegramNotifier {
 
         telegramService.sendMessage(msg);
     }
+
+    @EventListener
+    public void session(CreatedEvent event){
+
+    }
 }

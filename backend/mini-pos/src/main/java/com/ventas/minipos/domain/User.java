@@ -32,6 +32,13 @@ public class User implements UserDetails {
     private String name;
     Role role;
 
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Access> accesses;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null) return Collections.emptyList();

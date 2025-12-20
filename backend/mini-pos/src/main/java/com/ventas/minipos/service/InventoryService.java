@@ -101,7 +101,7 @@ public class InventoryService {
                 });
 
                 inventory.setStock(inventory.getStock() + item.getCantidad());
-                inventoryRepository.save(inventory); // 👈 Guardar el inventario, no el producto
+                inventoryRepository.save(inventory); // Guardar el inventario, no el producto
 
                 item.setProduct(product);
             } else {
